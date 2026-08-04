@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>おさむくん</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-title">
+      <span class="app-logo">📋</span>
+      <h1>おさむくん</h1>
+      <span class="version-badge" id="versionBadge">v1.1.0</span>
+    </div>
+    <div class="header-buttons">
+      <button id="btnNew" class="btn btn-primary btn-sm" title="新しい定型文を追加">＋ 新規</button>
+      <button id="btnIO" class="btn btn-ghost btn-sm" title="インポート／エクスポート">⚙</button>
+    </div>
+  </header>
+
+  <!-- 一覧ビュー -->
+  <section id="viewList" class="view">
+    <div class="search-area">
+      <input type="search" id="searchInput" placeholder="検索（タイトル・本文・カテゴリ）" autocomplete="off">
+      <select id="categoryFilter" title="カテゴリで絞り込み">
+        <option value="">すべてのカテゴリ</option>
+      </select>
+    </div>
+    <div class="list-meta" id="listMeta"></div>
+    <ul id="templateList" class="template-list"></ul>
+    <div id="emptyState" class="empty-state" hidden>
+      <p class="empty-main">定型文がまだありません</p>
+      <p class="empty-sub">「＋ 新規」から1件ずつ追加できます。</p>
+      <p class="empty-sub">スプレッドシートでカテゴリ／概要／本文の3列を選択してコピーし、入出力画面に貼り付けると、そのまま取り込めます。CSVファイルからも読み込めます。</p>
+      <p class="empty-sub empty-note">入出力画面はヘッダーの ⚙ から開けます。</p>
+      <button id="btnLoadSamples" class="btn btn-secondary">サンプル定型文を読み込む</button>
+    </div>
+    <div id="noResults" class="empty-state" hidden>
+      <p class="empty-main">見つかりませんでした</p>
+      <p class="empty-sub">検索語やカテゴリを変えてみてください。</p>
+    </div>
+  </section>
+
+  <!-- 編集ビュー -->
+  <section id="viewEdit" class="view" hidden>
+    <h2 id="editHeading" class="view-heading">定型文を追加</h2>
+    <div class="form-group">
+      <label for="editCategory">カテゴリ</label>
+      <input type="text" id="editCategory" list="categoryList" placeholder="例：依頼" autocomplete="off">
+      <datalist id="categoryList"></datalist>
+    </div>
+    <div class="form-group">
+      <label for="editTitle">概要（一覧に表示されるタイトル）</label>
+      <input type="text" id="editTitle" placeholder="例：資料送付のお願い" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label for="editBody">本文</label>
+      <textarea id="editBody" rows="12" placeholder="コピーされる本文"></textarea>
+    </div>
+    <div class="form-actions">
+      <button id="btnSave" class="btn btn-primary">保存</button>
+      <button id="btnCancelEdit" class="btn btn-ghost">キャンセル</button>
+      <span class="spacer"></span>
+      <button id="btnDelete" class="btn btn-danger" hidden>削除</button>
+    </div>
+  </section>
+
+  <!-- インポート／エクスポートビュー -->
+  <section id="viewIO" class="view" hidden>
+    <h2 class="view-heading">インポート／エクスポート</h2>
+
+    <div class="io-section">
+      <h3>インポート</h3>
+      <p class="io-hint">取り込む列は「カテゴリ／概要／本文」の3列です。下の設定は貼り付け・ファイル読み込みの両方に適用されます。</p>
+      <div class="radio-row">
+        <label><input type="radio" name="importMode" value="append" checked> 追記する</label>
+        <label><input type="radio" name="importMode" value="replace"> 全て置き換える</label>
+      </div>
+
+      <h4 class="io-subhead">スプレッドシートから貼り付け</h4>
+      <p class="io-hint">スプレッドシートで3列を範囲コピーして、下に貼り付けてください。</p>
+      <textarea id="importText" rows="6" placeholder="ここに貼り付け"></textarea>
+      <button id="btnImport" class="btn btn-primary">貼り付けた内容をインポート</button>
+
+      <h4 class="io-subhead">ファイルから読み込む</h4>
+      <p class="io-hint">CSV・TSVファイルに対応しています。区切り文字（カンマ／タブ）は自動で判定します。文字コードはUTF-8で保存してください。</p>
+      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="ファイルを選択、またはドロップ">
+        <span class="drop-zone-main">ここにファイルをドロップ</span>
+        <span class="drop-zone-sub">またはクリックしてファイルを選択（.csv / .tsv / .txt）</span>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,.tsv,.txt" hidden>
+      <p id="fileStatus" class="io-status" hidden></p>
+    </div>
+
+    <div class="io-section">
+      <h3>エクスポート</h3>
+      <p class="io-hint">登録済みの定型文をファイルとして保存します。CSV・TSVは読み込みにそのまま使えます。</p>
+      <div class="button-row">
+        <button id="btnExportCSV" class="btn btn-secondary">CSVで保存</button>
+        <button id="btnExportTSV" class="btn btn-secondary">TSVで保存</button>
+        <button id="btnExportJSON" class="btn btn-secondary">JSONで保存</button>
+      </div>
+    </div>
+
+    <div class="io-section io-danger">
+      <h3>データの削除</h3>
+      <button id="btnDeleteAll" class="btn btn-danger">全ての定型文を削除</button>
+    </div>
+
+    <div class="form-actions">
+      <button id="btnCloseIO" class="btn btn-ghost">一覧に戻る</button>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
