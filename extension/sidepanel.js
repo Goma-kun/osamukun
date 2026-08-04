@@ -155,6 +155,34 @@ async function openInWindow() {
   if (await ensureWindow()) window.close();
 }
 
+// サイドパネルとして開かれたとき、すでに別ウィンドウが生きていればそちらへ寄せる。
+// ツールバーのアイコンから開いた場合も2つ並ばないようにするため
+async function handOverToExistingWindow() {
+  if (isPopupWindow || !canOpenWindow) return false;
+  let id;
+  try {
+    const saved = await chrome.storage.local.get(POPUP_ID_KEY);
+    id = saved[POPUP_ID_KEY];
+  } catch {
+    return false;
+  }
+  if (id == null) return false;
+
+  try {
+    await chrome.windows.update(id, { focused: true, drawAttention: true });
+  } catch {
+    // すでに閉じられている。古いIDを捨てて、サイドパネルをそのまま使う
+    try {
+      await chrome.storage.local.remove(POPUP_ID_KEY);
+    } catch {
+      // 消せなくても実害はない（次回 update が失敗して同じ経路に来るだけ）
+    }
+    return false;
+  }
+  window.close();
+  return true;
+}
+
 // ===== 他のウィンドウとの同期 =====
 // サイドパネルと別ウィンドウを同時に開けるので、片方の変更をもう片方に反映する
 let pendingTemplates = null;
@@ -782,6 +810,8 @@ $('btnLoadSamples').addEventListener('click', loadSamples);
 
 // ===== 初期化 =====
 (async function init() {
+  // 別ウィンドウが生きているならそちらに任せて閉じる。描画前に判定して画面のちらつきを避ける
+  if (await handOverToExistingWindow()) return;
   templates = await storage.get();
   renderCategoryOptions();
   applyFilter();
