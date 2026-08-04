@@ -108,14 +108,14 @@ const POPUP_ID_KEY = 'popupWindowId';
 const isPopupWindow = new URLSearchParams(location.search).get('view') === 'window';
 const canOpenWindow = typeof chrome !== 'undefined' && !!chrome.windows && !!chrome.runtime;
 
-async function openInWindow() {
+async function ensureWindow() {
   // すでに開いているウィンドウがあれば、新しく作らずに前面へ出す
   try {
     const saved = await chrome.storage.local.get(POPUP_ID_KEY);
     const id = saved[POPUP_ID_KEY];
     if (id != null) {
       await chrome.windows.update(id, { focused: true, drawAttention: true });
-      return;
+      return true;
     }
   } catch {
     // 閉じられているとIDが無効になる。そのまま新規作成に進む
@@ -140,10 +140,19 @@ async function openInWindow() {
 
   try {
     const created = await chrome.windows.create(options);
+    // 閉じる前にIDを確実に保存する（保存前にパネルを閉じると次回の再利用ができなくなる）
     await chrome.storage.local.set({ [POPUP_ID_KEY]: created.id });
+    return true;
   } catch {
     showToast('別ウィンドウを開けませんでした', true);
+    return false;
   }
+}
+
+async function openInWindow() {
+  // 同じものがサイドパネルと別ウィンドウに2つ並ぶと分かりにくいので、
+  // 別ウィンドウを開けたらサイドパネルのほうは閉じる
+  if (await ensureWindow()) window.close();
 }
 
 // ===== 他のウィンドウとの同期 =====
