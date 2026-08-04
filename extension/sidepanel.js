@@ -534,8 +534,24 @@ function openEdit(id) {
   $('editTitle').value = t ? t.title : '';
   $('editBody').value = t ? t.body : '';
   $('btnDelete').hidden = !t;
+  $('editUndoBar').hidden = true;
   showView('edit');
   $('editTitle').focus();
+}
+
+// 保存していない変更があるかどうか。一覧に戻るときの確認に使う
+function hasUnsavedChanges() {
+  const t = editingId ? templates.find((x) => x.id === editingId) : null;
+  const category = $('editCategory').value.trim();
+  const title = $('editTitle').value.trim();
+  const body = $('editBody').value;
+  if (!t) return !!(category || title || body.trim());
+  return category !== t.category || title !== t.title || body !== t.body;
+}
+
+function leaveEdit() {
+  if (hasUnsavedChanges() && !confirm('保存していない変更があります。破棄して一覧に戻りますか？')) return;
+  showView('list');
 }
 
 async function saveEdit() {
@@ -559,13 +575,37 @@ async function saveEdit() {
       t.updatedAt = now;
     }
   } else {
-    templates.unshift({ id: uuid(), category, title, body, createdAt: now, updatedAt: now });
+    const created = { id: uuid(), category, title, body, createdAt: now, updatedAt: now };
+    templates.unshift(created);
+    // 保存後もこの画面に留まるので、次に保存したとき二重登録にならないよう対象を切り替える
+    editingId = created.id;
+    $('editHeading').textContent = '定型文の内容';
+    $('btnDelete').hidden = false;
+    $('btnCopyBody').hidden = false;
   }
   await storage.set(templates);
   renderCategoryOptions();
   applyFilter();
-  showView('list');
+
+  // 一覧には戻らず、この場で取り消せるようにする
+  $('editUndoText').textContent = `${label}を保存しました`;
+  $('editUndoBar').hidden = false;
   showToast('保存しました');
+}
+
+// 編集画面から直前の保存を取り消す
+async function undoFromEdit() {
+  await performUndo();
+  $('editUndoBar').hidden = true;
+  const t = editingId ? templates.find((x) => x.id === editingId) : null;
+  if (!t) {
+    // 追加そのものを取り消した場合は、この定型文がもう存在しない
+    showView('list');
+    return;
+  }
+  $('editCategory').value = t.category;
+  $('editTitle').value = t.title;
+  $('editBody').value = t.body;
 }
 
 async function deleteEditing() {
@@ -578,7 +618,7 @@ async function deleteEditing() {
   renderCategoryOptions();
   applyFilter();
   showView('list');
-  showToast('削除しました');
+  showToast('削除しました。⚙の「元に戻す」から取り消せます');
 }
 
 // ===== CSV / TSV パーサー（ここから）=====
@@ -930,7 +970,8 @@ $('btnCopyBody').addEventListener('click', async () => {
 });
 
 $('btnSave').addEventListener('click', saveEdit);
-$('btnCancelEdit').addEventListener('click', () => showView('list'));
+$('btnBackToList').addEventListener('click', leaveEdit);
+$('btnEditUndo').addEventListener('click', undoFromEdit);
 $('btnDelete').addEventListener('click', deleteEditing);
 
 $('btnImport').addEventListener('click', importPasted);

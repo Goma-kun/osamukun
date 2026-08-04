@@ -368,6 +368,21 @@ body {
   border-color: transparent;
 }
 
+/* 保存直後に出る取り消しバー */
+.edit-undo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
 .form-actions {
   display: flex;
   gap: 8px;
