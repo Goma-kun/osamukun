@@ -533,27 +533,70 @@ function openEdit(id) {
   $('editCategory').value = t ? t.category : categoryFilter.value || '';
   $('editTitle').value = t ? t.title : '';
   $('editBody').value = t ? t.body : '';
-  setJustSaved(false);
+  editJustSaved = false;
+  setEditBaseline();
+  updateEditState();
   showView('edit');
   $('editTitle').focus();
 }
 
-// 保存した直後は「一覧に戻る」と「元に戻す」だけにする。
-// 保存したばかりの画面に保存ボタンが残っていると何をすればいいのか分かりにくいため
-function setJustSaved(justSaved) {
-  $('editUndoBar').hidden = !justSaved;
-  $('btnSave').hidden = justSaved;
-  $('btnDelete').hidden = justSaved || !editingId;
+// 画面を開いた（または保存した）時点の内容。これと比べて「触ったかどうか」を判定する
+let editBaseline = null;
+let editJustSaved = false;
+
+function snapshotForm() {
+  return { category: $('editCategory').value, title: $('editTitle').value, body: $('editBody').value };
 }
 
-// 保存していない変更があるかどうか。一覧に戻るときの確認に使う
+function setEditBaseline() {
+  editBaseline = snapshotForm();
+}
+
 function hasUnsavedChanges() {
-  const t = editingId ? templates.find((x) => x.id === editingId) : null;
-  const category = $('editCategory').value.trim();
-  const title = $('editTitle').value.trim();
-  const body = $('editBody').value;
-  if (!t) return !!(category || title || body.trim());
-  return category !== t.category || title !== t.title || body !== t.body;
+  if (!editBaseline) return false;
+  const now = snapshotForm();
+  return (
+    now.category !== editBaseline.category || now.title !== editBaseline.title || now.body !== editBaseline.body
+  );
+}
+
+function fillForm(source) {
+  $('editCategory').value = source.category;
+  $('editTitle').value = source.title;
+  $('editBody').value = source.body;
+}
+
+// 編集画面のボタンとバーの出し分け。
+// 触っていなければ保存ボタンを出さないので、保存が現れること自体が
+// 「何か変えた」という合図になる
+function updateEditState() {
+  const notice = $('editNotice');
+  const dirty = hasUnsavedChanges();
+  if (dirty) editJustSaved = false;
+
+  $('btnDelete').hidden = editJustSaved || !editingId;
+  $('btnSave').hidden = !dirty;
+  $('btnEditUndo').hidden = !editJustSaved;
+  $('btnRevertEdit').hidden = !dirty;
+
+  if (editJustSaved) {
+    notice.hidden = false;
+    notice.className = 'edit-notice saved';
+  } else if (dirty) {
+    notice.hidden = false;
+    notice.className = 'edit-notice dirty';
+    $('editNoticeText').textContent = '保存していない変更があります';
+  } else {
+    notice.hidden = true;
+  }
+}
+
+// 保存前の入力を捨てて、開いた（または最後に保存した）時点の内容に戻す
+function revertEdit() {
+  if (!editBaseline) return;
+  fillForm(editBaseline);
+  updateEditState();
+  showToast('変更を取り消しました');
 }
 
 function leaveEdit() {
@@ -593,25 +636,31 @@ async function saveEdit() {
   renderCategoryOptions();
   applyFilter();
 
+  // 保存で前後の空白を落としているので、画面も保存後の内容に揃えてから基準にする
+  const saved = templates.find((x) => x.id === editingId);
+  if (saved) fillForm(saved);
+
   // 一覧には戻らず、この場で取り消せるようにする
-  $('editUndoText').textContent = `${label}を保存しました`;
-  setJustSaved(true);
+  $('editNoticeText').textContent = `${label}を保存しました`;
+  editJustSaved = true;
+  setEditBaseline();
+  updateEditState();
   showToast('保存しました');
 }
 
 // 編集画面から直前の保存を取り消す
 async function undoFromEdit() {
   await performUndo();
-  setJustSaved(false);
+  editJustSaved = false;
   const t = editingId ? templates.find((x) => x.id === editingId) : null;
   if (!t) {
     // 追加そのものを取り消した場合は、この定型文がもう存在しない
     showView('list');
     return;
   }
-  $('editCategory').value = t.category;
-  $('editTitle').value = t.title;
-  $('editBody').value = t.body;
+  fillForm(t);
+  setEditBaseline();
+  updateEditState();
 }
 
 async function deleteEditing() {
@@ -979,12 +1028,12 @@ $('btnSave').addEventListener('click', saveEdit);
 $('btnBackToList').addEventListener('click', leaveEdit);
 $('btnEditUndo').addEventListener('click', undoFromEdit);
 
-// 保存したあとに書き換え始めたら、保存・削除のある通常の状態に戻す。
-// 「保存しました」の表示を残したまま編集が進むと、何が保存済みなのか分からなくなるため
+$('btnRevertEdit').addEventListener('click', revertEdit);
+
+// 触ったらすぐ「保存していない変更があります」と保存ボタンを出す。
+// 変更したことに自分で気づけるようにするのが狙い
 for (const id of ['editCategory', 'editTitle', 'editBody']) {
-  $(id).addEventListener('input', () => {
-    if (!$('editUndoBar').hidden) setJustSaved(false);
-  });
+  $(id).addEventListener('input', updateEditState);
 }
 $('btnDelete').addEventListener('click', deleteEditing);
 

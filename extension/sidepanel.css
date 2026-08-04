@@ -368,24 +368,33 @@ body {
   border-color: transparent;
 }
 
-/* 保存直後に出る取り消しバー */
-.edit-undo {
+/* 編集画面の状態表示バー。保存直後は緑、未保存の変更があるときは黄 */
+.edit-notice {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   font-size: 12px;
   line-height: 1.5;
-  color: #166534;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
   border-radius: 8px;
   padding: 8px 10px;
   margin-bottom: 10px;
 }
 
-/* 「元に戻す」が折り返さないようにする */
-.edit-undo .btn {
+.edit-notice.saved {
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.edit-notice.dirty {
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+/* バー内のボタンが折り返さないようにする */
+.edit-notice .btn {
   flex-shrink: 0;
   white-space: nowrap;
 }

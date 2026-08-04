@@ -11,7 +11,7 @@
     <div class="app-title">
       <span class="app-logo">📋</span>
       <h1>おさむくん</h1>
-      <span class="version-badge" id="versionBadge">v1.6.1</span>
+      <span class="version-badge" id="versionBadge">v1.7.0</span>
     </div>
     <div class="header-buttons">
       <button id="btnNew" class="btn btn-primary btn-sm" title="新しい定型文を追加">＋ 新規</button>
@@ -63,13 +63,14 @@
       </div>
       <textarea id="editBody" rows="12" placeholder="コピーされる本文"></textarea>
     </div>
-    <div id="editUndoBar" class="edit-undo" hidden>
-      <span id="editUndoText">保存しました</span>
-      <button type="button" id="btnEditUndo" class="btn btn-secondary btn-xs">元に戻す</button>
+    <div id="editNotice" class="edit-notice" hidden>
+      <span id="editNoticeText"></span>
+      <button type="button" id="btnEditUndo" class="btn btn-secondary btn-xs" hidden>元に戻す</button>
+      <button type="button" id="btnRevertEdit" class="btn btn-secondary btn-xs" hidden>変更を取り消す</button>
     </div>
 
     <div class="form-actions">
-      <button id="btnSave" class="btn btn-primary">保存</button>
+      <button id="btnSave" class="btn btn-primary" hidden>保存</button>
       <button id="btnBackToList" class="btn btn-ghost">一覧に戻る</button>
       <span class="spacer"></span>
       <button id="btnDelete" class="btn btn-danger" hidden>削除</button>
