@@ -11,7 +11,7 @@
     <div class="app-title">
       <span class="app-logo">📋</span>
       <h1>おさむくん</h1>
-      <span class="version-badge" id="versionBadge">v1.3.1</span>
+      <span class="version-badge" id="versionBadge">v1.4.0</span>
     </div>
     <div class="header-buttons">
       <button id="btnNew" class="btn btn-primary btn-sm" title="新しい定型文を追加">＋ 新規</button>
@@ -57,7 +57,10 @@
       <input type="text" id="editTitle" placeholder="例：資料送付のお願い" autocomplete="off">
     </div>
     <div class="form-group">
-      <label for="editBody">本文</label>
+      <div class="label-row">
+        <label for="editBody">本文</label>
+        <button type="button" id="btnCopyBody" class="btn btn-secondary btn-xs">本文をコピー</button>
+      </div>
       <textarea id="editBody" rows="12" placeholder="コピーされる本文"></textarea>
     </div>
     <div class="form-actions">

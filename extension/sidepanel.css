@@ -259,29 +259,32 @@ body {
   overflow: hidden;
 }
 
-.item-edit-btn {
+.item-detail-btn {
   position: absolute;
   top: 6px;
   right: 6px;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--border);
+  background: var(--surface);
   color: var(--text-sub);
-  font-size: 13px;
-  padding: 2px 5px;
-  border-radius: 4px;
+  font-size: 10px;
+  font-family: inherit;
+  line-height: 1.4;
+  padding: 1px 6px;
+  border-radius: 8px;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
 }
 
-.template-item:hover .item-edit-btn,
-.template-item.selected .item-edit-btn {
+.template-item:hover .item-detail-btn,
+.template-item.selected .item-detail-btn {
   opacity: 1;
 }
 
-.item-edit-btn:hover {
-  background: var(--border);
-  color: var(--text);
+.item-detail-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
 }
 
 /* 空の状態 */
@@ -322,6 +325,24 @@ body {
   font-weight: 600;
   color: var(--text-sub);
   margin-bottom: 4px;
+}
+
+/* ラベルの右にボタンを並べる行 */
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.label-row label {
+  margin-bottom: 0;
+}
+
+.btn-xs {
+  padding: 3px 9px;
+  font-size: 11px;
 }
 
 .form-group input,

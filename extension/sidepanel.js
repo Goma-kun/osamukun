@@ -354,15 +354,17 @@ function renderList() {
     preview.textContent = t.body.replace(/\s*\n\s*/g, ' ').trim();
     li.appendChild(preview);
 
-    const editBtn = document.createElement('button');
-    editBtn.className = 'item-edit-btn';
-    editBtn.textContent = '✎';
-    editBtn.title = '編集';
-    editBtn.addEventListener('click', (e) => {
+    // 一覧では本文が2行までしか出ないので、全文を読むための入口を用意する。
+    // 開いた先で編集も保存もコピーもできる
+    const detailBtn = document.createElement('button');
+    detailBtn.className = 'item-detail-btn';
+    detailBtn.textContent = '全文';
+    detailBtn.title = '全文を見る（編集・コピーもできます）';
+    detailBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       openEdit(t.id);
     });
-    li.appendChild(editBtn);
+    li.appendChild(detailBtn);
 
     li.addEventListener('click', () => copyTemplate(t, li));
     fragment.appendChild(li);
@@ -433,7 +435,9 @@ document.addEventListener('keydown', (e) => {
 function openEdit(id) {
   editingId = id || null;
   const t = id ? templates.find((x) => x.id === id) : null;
-  $('editHeading').textContent = t ? '定型文を編集' : '定型文を追加';
+  // 全文を読むために開くことも多いので、見出しは「編集」と言い切らない
+  $('editHeading').textContent = t ? '定型文の内容' : '定型文を追加';
+  $('btnCopyBody').hidden = !t;
   $('editCategory').value = t ? t.category : categoryFilter.value || '';
   $('editTitle').value = t ? t.title : '';
   $('editBody').value = t ? t.body : '';
@@ -814,6 +818,17 @@ if (canOpenWindow && isPopupWindow && chrome.sidePanel && chrome.sidePanel.open)
   $('btnDock').addEventListener('click', returnToSidePanel);
 }
 $('btnCloseIO').addEventListener('click', () => showView('list'));
+
+// 画面に出ている本文をそのままコピーする（編集中の内容もそのまま持っていける）
+$('btnCopyBody').addEventListener('click', async () => {
+  const body = $('editBody').value;
+  if (!body.trim()) {
+    showToast('本文が空です', true);
+    return;
+  }
+  const ok = await copyText(body);
+  showToast(ok ? '本文をコピーしました' : 'コピーに失敗しました', !ok);
+});
 
 $('btnSave').addEventListener('click', saveEdit);
 $('btnCancelEdit').addEventListener('click', () => showView('list'));
