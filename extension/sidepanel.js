@@ -105,6 +105,8 @@ function showView(name) {
 const WINDOW_WIDTH = 400;
 const WINDOW_HEIGHT = 700;
 const POPUP_ID_KEY = 'popupWindowId';
+// サイドパネルに戻すとき、開いたときと同じウィンドウに戻すために覚えておく
+const ORIGIN_ID_KEY = 'popupOriginWindowId';
 const isPopupWindow = new URLSearchParams(location.search).get('view') === 'window';
 const canOpenWindow = typeof chrome !== 'undefined' && !!chrome.windows && !!chrome.runtime;
 
@@ -127,25 +129,57 @@ async function ensureWindow() {
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
   };
-  // 元のウィンドウの右端に沿えて出す。座標が取れない場合はChromeの既定位置に任せる
-  try {
-    const base = await chrome.windows.getLastFocused();
-    if (typeof base.left === 'number' && typeof base.width === 'number') {
-      options.left = Math.max(0, base.left + base.width - WINDOW_WIDTH - 20);
-      options.top = Math.max(0, (base.top || 0) + 20);
-    }
-  } catch {
-    // 位置指定なしで開く
+  // いま自分が入っているウィンドウ。位置の基準にもなるし、戻り先としても覚えておく
+  const base = await getOwnWindow();
+  if (base && typeof base.left === 'number' && typeof base.width === 'number') {
+    options.left = Math.max(0, base.left + base.width - WINDOW_WIDTH - 20);
+    options.top = Math.max(0, (base.top || 0) + 20);
   }
 
   try {
     const created = await chrome.windows.create(options);
     // 閉じる前にIDを確実に保存する（保存前にパネルを閉じると次回の再利用ができなくなる）
-    await chrome.storage.local.set({ [POPUP_ID_KEY]: created.id });
+    const toSave = { [POPUP_ID_KEY]: created.id };
+    if (base && base.type === 'normal') toSave[ORIGIN_ID_KEY] = base.id;
+    await chrome.storage.local.set(toSave);
     return true;
   } catch {
     showToast('別ウィンドウを開けませんでした', true);
     return false;
+  }
+}
+
+// 自分が属しているウィンドウを取る。getCurrent が使えない場合に備えて getLastFocused に落とす
+async function getOwnWindow() {
+  try {
+    return await chrome.windows.getCurrent();
+  } catch {
+    try {
+      return await chrome.windows.getLastFocused();
+    } catch {
+      return null;
+    }
+  }
+}
+
+// サイドパネルを開き直す先を決める。開いたときと同じウィンドウを最優先にする
+async function findSidePanelTarget() {
+  try {
+    const saved = await chrome.storage.local.get(ORIGIN_ID_KEY);
+    const originId = saved[ORIGIN_ID_KEY];
+    if (originId != null) {
+      const origin = await chrome.windows.get(originId);
+      if (origin && origin.type === 'normal') return origin;
+    }
+  } catch {
+    // 元のウィンドウが閉じられている。下のフォールバックへ
+  }
+
+  try {
+    const normals = (await chrome.windows.getAll()).filter((w) => w.type === 'normal');
+    return normals.find((w) => w.focused) || normals[0] || null;
+  } catch {
+    return null;
   }
 }
 
@@ -160,17 +194,9 @@ async function openInWindow() {
 // IDが残ったままだと、開いたサイドパネルが handOverToExistingWindow() で
 // 「別ウィンドウが生きている」と判断して即座に自分を閉じてしまう
 async function returnToSidePanel() {
-  let self = null;
-  let target = null;
-  try {
-    // populate を付けなければタブ情報を取らないので tabs 権限は要らない
-    const windows = await chrome.windows.getAll();
-    const normals = windows.filter((w) => w.type === 'normal');
-    target = normals.find((w) => w.focused) || normals[0] || null;
-    self = await chrome.windows.getCurrent();
-  } catch {
-    // 取得できなかった場合は下で弾く
-  }
+  // populate を付けずにウィンドウを見るだけなので tabs 権限は要らない
+  const target = await findSidePanelTarget();
+  const self = await getOwnWindow();
 
   if (!target) {
     showToast('戻せるブラウザウィンドウがありません', true);
@@ -178,7 +204,7 @@ async function returnToSidePanel() {
   }
 
   try {
-    await chrome.storage.local.remove(POPUP_ID_KEY);
+    await chrome.storage.local.remove([POPUP_ID_KEY, ORIGIN_ID_KEY]);
   } catch {
     // 消せなくても続行する（最悪サイドパネルが閉じるだけで、このウィンドウは残る）
   }
@@ -189,7 +215,7 @@ async function returnToSidePanel() {
     // 開けなかったらIDを戻して、この別ウィンドウをそのまま使い続けられるようにする
     if (self) {
       try {
-        await chrome.storage.local.set({ [POPUP_ID_KEY]: self.id });
+        await chrome.storage.local.set({ [POPUP_ID_KEY]: self.id, [ORIGIN_ID_KEY]: target.id });
       } catch {
         // 戻せない場合は二重表示になりうるが、実害は表示だけ
       }
@@ -225,7 +251,7 @@ async function handOverToExistingWindow() {
   } catch {
     // すでに閉じられている。古いIDを捨てて、サイドパネルをそのまま使う
     try {
-      await chrome.storage.local.remove(POPUP_ID_KEY);
+      await chrome.storage.local.remove([POPUP_ID_KEY, ORIGIN_ID_KEY]);
     } catch {
       // 消せなくても実害はない（次回 update が失敗して同じ経路に来るだけ）
     }
