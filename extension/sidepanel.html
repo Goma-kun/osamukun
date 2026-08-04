@@ -11,7 +11,7 @@
     <div class="app-title">
       <span class="app-logo">📋</span>
       <h1>おさむくん</h1>
-      <span class="version-badge" id="versionBadge">v1.4.0</span>
+      <span class="version-badge" id="versionBadge">v1.5.0</span>
     </div>
     <div class="header-buttons">
       <button id="btnNew" class="btn btn-primary btn-sm" title="新しい定型文を追加">＋ 新規</button>
@@ -106,6 +106,13 @@
         <button id="btnExportTSV" class="btn btn-secondary">TSVで保存</button>
         <button id="btnExportJSON" class="btn btn-secondary">JSONで保存</button>
       </div>
+    </div>
+
+    <div class="io-section">
+      <h3>元に戻す</h3>
+      <p class="io-hint">直前の操作をひとつだけ取り消せます。保存・追加・削除・インポートが対象です。もう一度押すと取り消した操作をやり直せます。</p>
+      <button id="btnUndo" class="btn btn-secondary" hidden>直前の操作を取り消す</button>
+      <p id="undoInfo" class="io-status"></p>
     </div>
 
     <div class="io-section io-danger">

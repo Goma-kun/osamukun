@@ -12,6 +12,12 @@ const storage = (() => {
       async set(templates) {
         await chrome.storage.local.set({ templates });
       },
+      async getRaw(key) {
+        return (await chrome.storage.local.get(key))[key];
+      },
+      async setRaw(key, value) {
+        await chrome.storage.local.set({ [key]: value });
+      },
     };
   }
   return {
@@ -24,6 +30,16 @@ const storage = (() => {
     },
     async set(templates) {
       localStorage.setItem('templates', JSON.stringify(templates));
+    },
+    async getRaw(key) {
+      try {
+        return JSON.parse(localStorage.getItem(key)) || undefined;
+      } catch {
+        return undefined;
+      }
+    },
+    async setRaw(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
     },
   };
 })();
@@ -96,6 +112,79 @@ function showView(name) {
   if (name === 'list') {
     searchInput.focus();
   }
+  // 入出力画面を開くたびに、取り消せる操作の表示を最新にする
+  if (name === 'io') refreshUndoUI();
+}
+
+// ===== 元に戻す =====
+// 破壊的な操作の直前の状態を1つだけ保持する。版管理までは持たず、
+// 「直前のやらかしを取り消す」1段に絞っている
+const UNDO_KEY = 'undoSnapshot';
+
+// 変更を加える「前」に呼ぶこと。
+// isUndo は「この状態に戻すと、いま取り消した操作をやり直すことになる」という印
+async function captureUndo(label, isUndo = false) {
+  try {
+    await storage.setRaw(UNDO_KEY, {
+      templates: JSON.parse(JSON.stringify(templates)),
+      label,
+      at: Date.now(),
+      isUndo,
+    });
+  } catch {
+    // 記録できなくても本来の操作は続行させる
+  }
+}
+
+function formatUndoTime(at) {
+  const d = new Date(at);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+async function refreshUndoUI() {
+  let snapshot;
+  try {
+    snapshot = await storage.getRaw(UNDO_KEY);
+  } catch {
+    snapshot = undefined;
+  }
+  const btn = $('btnUndo');
+  const info = $('undoInfo');
+  if (!snapshot || !Array.isArray(snapshot.templates)) {
+    btn.hidden = true;
+    info.textContent = '取り消せる操作はありません。';
+    return;
+  }
+  btn.hidden = false;
+  btn.textContent = snapshot.isUndo ? '取り消した操作をやり直す' : '直前の操作を取り消す';
+  info.textContent = snapshot.isUndo
+    ? `やり直せる操作：${snapshot.label}（${formatUndoTime(snapshot.at)}）`
+    : `取り消せる操作：${snapshot.label}（${formatUndoTime(snapshot.at)}）`;
+}
+
+async function performUndo() {
+  let snapshot;
+  try {
+    snapshot = await storage.getRaw(UNDO_KEY);
+  } catch {
+    snapshot = undefined;
+  }
+  if (!snapshot || !Array.isArray(snapshot.templates)) {
+    showToast('取り消せる操作がありません', true);
+    await refreshUndoUI();
+    return;
+  }
+
+  // 取り消し自体もやり直せるように、いまの状態を新しいスナップショットにする。
+  // isUndo を反転させることで「取り消す」と「やり直す」を行き来できる
+  await captureUndo(snapshot.label, !snapshot.isUndo);
+  templates = snapshot.templates;
+  await storage.set(templates);
+  renderCategoryOptions();
+  applyFilter();
+  await refreshUndoUI();
+  showToast(snapshot.isUndo ? `${snapshot.label} をやり直しました` : `${snapshot.label} を取り消しました`);
 }
 
 // ===== 別ウィンドウ表示 =====
@@ -275,7 +364,10 @@ function applyPendingTemplates() {
 
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== 'local' || !changes.templates) return;
+    if (area !== 'local') return;
+    // もう片方の画面で操作されたら、取り消せる内容の表示も合わせる
+    if (changes[UNDO_KEY] && !viewIO.hidden) refreshUndoUI();
+    if (!changes.templates) return;
     pendingTemplates = changes.templates.newValue || [];
     if (viewEdit.hidden) applyPendingTemplates();
   });
@@ -454,6 +546,9 @@ async function saveEdit() {
     showToast('概要か本文を入力してください', true);
     return;
   }
+  const label = `「${title || '（無題）'}」の${editingId ? '編集' : '追加'}`;
+  await captureUndo(label);
+
   const now = Date.now();
   if (editingId) {
     const t = templates.find((x) => x.id === editingId);
@@ -477,6 +572,7 @@ async function deleteEditing() {
   if (!editingId) return;
   const t = templates.find((x) => x.id === editingId);
   if (!confirm(`「${t ? t.title : ''}」を削除しますか？`)) return;
+  await captureUndo(`「${t ? t.title : ''}」の削除`);
   templates = templates.filter((x) => x.id !== editingId);
   await storage.set(templates);
   renderCategoryOptions();
@@ -639,8 +735,10 @@ async function runImport(rows, { backToList }) {
     if (!confirm(`既存の${templates.length}件を削除して、${imported.length}件で置き換えます。よろしいですか？`)) {
       return { ok: false, cancelled: true, imported: 0, skipped, message: 'インポートを中止しました' };
     }
+    await captureUndo(`${imported.length}件で置き換え`);
     templates = imported;
   } else {
+    await captureUndo(`${imported.length}件のインポート`);
     templates = [...imported, ...templates];
   }
   await storage.set(templates);
@@ -785,6 +883,7 @@ const SAMPLE_TEMPLATES = [
 ];
 
 async function loadSamples() {
+  await captureUndo(`サンプル${SAMPLE_TEMPLATES.length}件の追加`);
   const now = Date.now();
   const items = SAMPLE_TEMPLATES.map((t, i) => ({
     id: uuid(),
@@ -897,15 +996,17 @@ $('btnDeleteAll').addEventListener('click', async () => {
     return;
   }
   if (!confirm(`全${templates.length}件の定型文を削除します。よろしいですか？`)) return;
+  await captureUndo(`全${templates.length}件の削除`);
   templates = [];
   await storage.set(templates);
   renderCategoryOptions();
   applyFilter();
   showView('list');
-  showToast('全て削除しました');
+  showToast('全て削除しました。⚙の「元に戻す」から取り消せます');
 });
 
 $('btnLoadSamples').addEventListener('click', loadSamples);
+$('btnUndo').addEventListener('click', performUndo);
 
 // ===== 初期化 =====
 (async function init() {
