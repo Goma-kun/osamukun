@@ -155,6 +155,58 @@ async function openInWindow() {
   if (await ensureWindow()) window.close();
 }
 
+// 別ウィンドウからサイドパネルへ戻す。
+// 順序が重要で、記憶しているウィンドウIDを消してから chrome.sidePanel.open() を呼ぶ。
+// IDが残ったままだと、開いたサイドパネルが handOverToExistingWindow() で
+// 「別ウィンドウが生きている」と判断して即座に自分を閉じてしまう
+async function returnToSidePanel() {
+  let self = null;
+  let target = null;
+  try {
+    // populate を付けなければタブ情報を取らないので tabs 権限は要らない
+    const windows = await chrome.windows.getAll();
+    const normals = windows.filter((w) => w.type === 'normal');
+    target = normals.find((w) => w.focused) || normals[0] || null;
+    self = await chrome.windows.getCurrent();
+  } catch {
+    // 取得できなかった場合は下で弾く
+  }
+
+  if (!target) {
+    showToast('戻せるブラウザウィンドウがありません', true);
+    return;
+  }
+
+  try {
+    await chrome.storage.local.remove(POPUP_ID_KEY);
+  } catch {
+    // 消せなくても続行する（最悪サイドパネルが閉じるだけで、このウィンドウは残る）
+  }
+
+  try {
+    await chrome.sidePanel.open({ windowId: target.id });
+  } catch {
+    // 開けなかったらIDを戻して、この別ウィンドウをそのまま使い続けられるようにする
+    if (self) {
+      try {
+        await chrome.storage.local.set({ [POPUP_ID_KEY]: self.id });
+      } catch {
+        // 戻せない場合は二重表示になりうるが、実害は表示だけ
+      }
+    }
+    showToast('サイドパネルを開けませんでした', true);
+    return;
+  }
+
+  // サイドパネルはブラウザ側のウィンドウに出るので、そちらを前面に持ってくる
+  try {
+    await chrome.windows.update(target.id, { focused: true });
+  } catch {
+    // 前面化に失敗しても閉じてよい
+  }
+  window.close();
+}
+
 // サイドパネルとして開かれたとき、すでに別ウィンドウが生きていればそちらへ寄せる。
 // ツールバーのアイコンから開いた場合も2つ並ばないようにするため
 async function handOverToExistingWindow() {
@@ -728,6 +780,12 @@ $('btnIO').addEventListener('click', () => showView('io'));
 if (canOpenWindow && !isPopupWindow) {
   $('btnPopout').hidden = false;
   $('btnPopout').addEventListener('click', openInWindow);
+}
+
+// サイドパネルに戻すボタンは、別ウィンドウ側でだけ出す
+if (canOpenWindow && isPopupWindow && chrome.sidePanel && chrome.sidePanel.open) {
+  $('btnDock').hidden = false;
+  $('btnDock').addEventListener('click', returnToSidePanel);
 }
 $('btnCloseIO').addEventListener('click', () => showView('list'));
 
