@@ -88,12 +88,82 @@ async function copyText(text) {
 
 // ===== ビュー切り替え =====
 function showView(name) {
+  // 編集中に他のウィンドウの変更を反映すると入力が消えるので、離れるまで待たせている
+  if (name !== 'edit') applyPendingTemplates();
   viewList.hidden = name !== 'list';
   viewEdit.hidden = name !== 'edit';
   viewIO.hidden = name !== 'io';
   if (name === 'list') {
     searchInput.focus();
   }
+}
+
+// ===== 別ウィンドウ表示 =====
+// サイドパネルはChromeの仕様で枠から切り離せないため、独立したウィンドウで開く手段を用意する。
+// chrome.windows は権限宣言なしで使えるので、権限は sidePanel / storage のまま増えない。
+// （既存ウィンドウの再利用も、URL検索ではなくウィンドウIDの記憶で済ませて tabs 権限を避けている）
+const WINDOW_WIDTH = 400;
+const WINDOW_HEIGHT = 700;
+const POPUP_ID_KEY = 'popupWindowId';
+const isPopupWindow = new URLSearchParams(location.search).get('view') === 'window';
+const canOpenWindow = typeof chrome !== 'undefined' && !!chrome.windows && !!chrome.runtime;
+
+async function openInWindow() {
+  // すでに開いているウィンドウがあれば、新しく作らずに前面へ出す
+  try {
+    const saved = await chrome.storage.local.get(POPUP_ID_KEY);
+    const id = saved[POPUP_ID_KEY];
+    if (id != null) {
+      await chrome.windows.update(id, { focused: true, drawAttention: true });
+      return;
+    }
+  } catch {
+    // 閉じられているとIDが無効になる。そのまま新規作成に進む
+  }
+
+  const options = {
+    url: chrome.runtime.getURL('sidepanel.html') + '?view=window',
+    type: 'popup',
+    width: WINDOW_WIDTH,
+    height: WINDOW_HEIGHT,
+  };
+  // 元のウィンドウの右端に沿えて出す。座標が取れない場合はChromeの既定位置に任せる
+  try {
+    const base = await chrome.windows.getLastFocused();
+    if (typeof base.left === 'number' && typeof base.width === 'number') {
+      options.left = Math.max(0, base.left + base.width - WINDOW_WIDTH - 20);
+      options.top = Math.max(0, (base.top || 0) + 20);
+    }
+  } catch {
+    // 位置指定なしで開く
+  }
+
+  try {
+    const created = await chrome.windows.create(options);
+    await chrome.storage.local.set({ [POPUP_ID_KEY]: created.id });
+  } catch {
+    showToast('別ウィンドウを開けませんでした', true);
+  }
+}
+
+// ===== 他のウィンドウとの同期 =====
+// サイドパネルと別ウィンドウを同時に開けるので、片方の変更をもう片方に反映する
+let pendingTemplates = null;
+
+function applyPendingTemplates() {
+  if (!pendingTemplates) return;
+  templates = pendingTemplates;
+  pendingTemplates = null;
+  renderCategoryOptions();
+  applyFilter();
+}
+
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local' || !changes.templates) return;
+    pendingTemplates = changes.templates.newValue || [];
+    if (viewEdit.hidden) applyPendingTemplates();
+  });
 }
 
 // ===== カテゴリ =====
@@ -616,6 +686,12 @@ categoryFilter.addEventListener('change', applyFilter);
 
 $('btnNew').addEventListener('click', () => openEdit(null));
 $('btnIO').addEventListener('click', () => showView('io'));
+
+// 別ウィンドウで開くボタンは、拡張として動いていてサイドパネル側にいるときだけ出す
+if (canOpenWindow && !isPopupWindow) {
+  $('btnPopout').hidden = false;
+  $('btnPopout').addEventListener('click', openInWindow);
+}
 $('btnCloseIO').addEventListener('click', () => showView('list'));
 
 $('btnSave').addEventListener('click', saveEdit);
