@@ -533,10 +533,17 @@ function openEdit(id) {
   $('editCategory').value = t ? t.category : categoryFilter.value || '';
   $('editTitle').value = t ? t.title : '';
   $('editBody').value = t ? t.body : '';
-  $('btnDelete').hidden = !t;
-  $('editUndoBar').hidden = true;
+  setJustSaved(false);
   showView('edit');
   $('editTitle').focus();
+}
+
+// 保存した直後は「一覧に戻る」と「元に戻す」だけにする。
+// 保存したばかりの画面に保存ボタンが残っていると何をすればいいのか分かりにくいため
+function setJustSaved(justSaved) {
+  $('editUndoBar').hidden = !justSaved;
+  $('btnSave').hidden = justSaved;
+  $('btnDelete').hidden = justSaved || !editingId;
 }
 
 // 保存していない変更があるかどうか。一覧に戻るときの確認に使う
@@ -580,7 +587,6 @@ async function saveEdit() {
     // 保存後もこの画面に留まるので、次に保存したとき二重登録にならないよう対象を切り替える
     editingId = created.id;
     $('editHeading').textContent = '定型文の内容';
-    $('btnDelete').hidden = false;
     $('btnCopyBody').hidden = false;
   }
   await storage.set(templates);
@@ -589,14 +595,14 @@ async function saveEdit() {
 
   // 一覧には戻らず、この場で取り消せるようにする
   $('editUndoText').textContent = `${label}を保存しました`;
-  $('editUndoBar').hidden = false;
+  setJustSaved(true);
   showToast('保存しました');
 }
 
 // 編集画面から直前の保存を取り消す
 async function undoFromEdit() {
   await performUndo();
-  $('editUndoBar').hidden = true;
+  setJustSaved(false);
   const t = editingId ? templates.find((x) => x.id === editingId) : null;
   if (!t) {
     // 追加そのものを取り消した場合は、この定型文がもう存在しない
@@ -972,6 +978,14 @@ $('btnCopyBody').addEventListener('click', async () => {
 $('btnSave').addEventListener('click', saveEdit);
 $('btnBackToList').addEventListener('click', leaveEdit);
 $('btnEditUndo').addEventListener('click', undoFromEdit);
+
+// 保存したあとに書き換え始めたら、保存・削除のある通常の状態に戻す。
+// 「保存しました」の表示を残したまま編集が進むと、何が保存済みなのか分からなくなるため
+for (const id of ['editCategory', 'editTitle', 'editBody']) {
+  $(id).addEventListener('input', () => {
+    if (!$('editUndoBar').hidden) setJustSaved(false);
+  });
+}
 $('btnDelete').addEventListener('click', deleteEditing);
 
 $('btnImport').addEventListener('click', importPasted);
