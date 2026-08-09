@@ -1,3 +1,6 @@
 .DS_Store
 __MACOSX/
 osamukun-*.zip
+
+# 申請用の内部メモ。アカウント情報を含むので公開しない
+STORE_LISTING.md
