@@ -1,5 +1,59 @@
 'use strict';
 
+// ===== 多言語化 =====
+// 拡張として動いているときは chrome.i18n を使う。
+// プレビュー（chrome が無い開発用サーバー）では _locales/ja/messages.json を読んで同じ関数で引く
+const hasChromeI18n = typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage;
+let previewMessages = null;
+
+function uiLanguage() {
+  if (hasChromeI18n && chrome.i18n.getUILanguage) return chrome.i18n.getUILanguage();
+  return 'ja';
+}
+
+function isJapaneseUI() {
+  return uiLanguage().toLowerCase().startsWith('ja');
+}
+
+// $1・$2… の位置に値を差し込む。chrome.i18n と同じ書式を自前でも解釈する
+function T(key, ...subs) {
+  if (hasChromeI18n) {
+    const s = subs.map(String);
+    return chrome.i18n.getMessage(key, s.length ? s : undefined) || key;
+  }
+  const entry = previewMessages && previewMessages[key];
+  if (!entry) return key;
+  return entry.message.replace(/\$(\d)/g, (m, n) => {
+    const v = subs[Number(n) - 1];
+    return v === undefined ? m : String(v);
+  });
+}
+
+async function loadPreviewMessages() {
+  if (hasChromeI18n) return;
+  try {
+    previewMessages = await (await fetch('_locales/ja/messages.json')).json();
+  } catch {
+    // 読めなくてもキー名がそのまま出るだけ。拡張としての動作には影響しない
+  }
+}
+
+function applyI18n() {
+  for (const el of document.querySelectorAll('[data-i18n]')) {
+    el.textContent = T(el.dataset.i18n);
+  }
+  for (const el of document.querySelectorAll('[data-i18n-title]')) {
+    el.title = T(el.dataset.i18nTitle);
+  }
+  for (const el of document.querySelectorAll('[data-i18n-placeholder]')) {
+    el.placeholder = T(el.dataset.i18nPlaceholder);
+  }
+  for (const el of document.querySelectorAll('[data-i18n-aria-label]')) {
+    el.setAttribute('aria-label', T(el.dataset.i18nAriaLabel));
+  }
+  document.documentElement.lang = uiLanguage();
+}
+
 // ===== ストレージ抽象化 =====
 // 拡張機能内では chrome.storage.local、通常ブラウザ（開発プレビュー）では localStorage を使う
 const storage = (() => {
@@ -153,14 +207,16 @@ async function refreshUndoUI() {
   const info = $('undoInfo');
   if (!snapshot || !Array.isArray(snapshot.templates)) {
     btn.hidden = true;
-    info.textContent = '取り消せる操作はありません。';
+    info.textContent = T('undoNone');
     return;
   }
   btn.hidden = false;
-  btn.textContent = snapshot.isUndo ? '取り消した操作をやり直す' : '直前の操作を取り消す';
-  info.textContent = snapshot.isUndo
-    ? `やり直せる操作：${snapshot.label}（${formatUndoTime(snapshot.at)}）`
-    : `取り消せる操作：${snapshot.label}（${formatUndoTime(snapshot.at)}）`;
+  btn.textContent = T(snapshot.isUndo ? 'btnRedo' : 'btnUndo');
+  info.textContent = T(
+    snapshot.isUndo ? 'redoAvailable' : 'undoAvailable',
+    snapshot.label,
+    formatUndoTime(snapshot.at)
+  );
 }
 
 async function performUndo() {
@@ -171,7 +227,7 @@ async function performUndo() {
     snapshot = undefined;
   }
   if (!snapshot || !Array.isArray(snapshot.templates)) {
-    showToast('取り消せる操作がありません', true);
+    showToast(T('toastNothingToUndo'), true);
     await refreshUndoUI();
     return;
   }
@@ -184,7 +240,7 @@ async function performUndo() {
   renderCategoryOptions();
   applyFilter();
   await refreshUndoUI();
-  showToast(snapshot.isUndo ? `${snapshot.label} をやり直しました` : `${snapshot.label} を取り消しました`);
+  showToast(T(snapshot.isUndo ? 'toastRedone' : 'toastUndone', snapshot.label));
 }
 
 // ===== 別ウィンドウ表示 =====
@@ -197,6 +253,9 @@ const POPUP_ID_KEY = 'popupWindowId';
 // サイドパネルに戻すとき、開いたときと同じウィンドウに戻すために覚えておく
 const ORIGIN_ID_KEY = 'popupOriginWindowId';
 const isPopupWindow = new URLSearchParams(location.search).get('view') === 'window';
+// まとめるくん（自作のハブ拡張）の iframe 内で動いているとき。
+// ハブ側の窓がすでに「切り離された1枚」なので、こちらの切り離し・移譲は全部黙らせる
+const isEmbedded = window.self !== window.top;
 const canOpenWindow = typeof chrome !== 'undefined' && !!chrome.windows && !!chrome.runtime;
 
 async function ensureWindow() {
@@ -233,7 +292,7 @@ async function ensureWindow() {
     await chrome.storage.local.set(toSave);
     return true;
   } catch {
-    showToast('別ウィンドウを開けませんでした', true);
+    showToast(T('toastWindowFailed'), true);
     return false;
   }
 }
@@ -288,7 +347,7 @@ async function returnToSidePanel() {
   const self = await getOwnWindow();
 
   if (!target) {
-    showToast('戻せるブラウザウィンドウがありません', true);
+    showToast(T('toastNoBrowserWindow'), true);
     return;
   }
 
@@ -309,7 +368,7 @@ async function returnToSidePanel() {
         // 戻せない場合は二重表示になりうるが、実害は表示だけ
       }
     }
-    showToast('サイドパネルを開けませんでした', true);
+    showToast(T('toastSidePanelFailed'), true);
     return;
   }
 
@@ -325,7 +384,7 @@ async function returnToSidePanel() {
 // サイドパネルとして開かれたとき、すでに別ウィンドウが生きていればそちらへ寄せる。
 // ツールバーのアイコンから開いた場合も2つ並ばないようにするため
 async function handOverToExistingWindow() {
-  if (isPopupWindow || !canOpenWindow) return false;
+  if (isPopupWindow || isEmbedded || !canOpenWindow) return false;
   let id;
   try {
     const saved = await chrome.storage.local.get(POPUP_ID_KEY);
@@ -385,7 +444,11 @@ function getCategories() {
 function renderCategoryOptions() {
   const categories = getCategories();
   const current = categoryFilter.value;
-  categoryFilter.innerHTML = '<option value="">すべてのカテゴリ</option>';
+  categoryFilter.innerHTML = '';
+  const all = document.createElement('option');
+  all.value = '';
+  all.textContent = T('allCategories');
+  categoryFilter.appendChild(all);
   const datalist = $('categoryList');
   datalist.innerHTML = '';
   for (const c of categories) {
@@ -436,7 +499,7 @@ function renderList() {
     }
     const title = document.createElement('span');
     title.className = 'item-title';
-    title.textContent = t.title || '（無題）';
+    title.textContent = t.title || T('untitled');
     top.appendChild(title);
     li.appendChild(top);
 
@@ -450,8 +513,8 @@ function renderList() {
     // 開いた先で編集も保存もコピーもできる
     const detailBtn = document.createElement('button');
     detailBtn.className = 'item-detail-btn';
-    detailBtn.textContent = '全文';
-    detailBtn.title = '全文を見る（編集・コピーもできます）';
+    detailBtn.textContent = T('detailBtn');
+    detailBtn.title = T('detailBtnTip');
     detailBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       openEdit(t.id);
@@ -470,20 +533,20 @@ function renderList() {
     templates.length === 0
       ? ''
       : filtered.length === templates.length
-        ? `${templates.length}件`
-        : `${filtered.length}件 / 全${templates.length}件`;
+        ? T('countAll', templates.length)
+        : T('countFiltered', filtered.length, templates.length);
 }
 
 async function copyTemplate(t, element) {
   const ok = await copyText(t.body);
   if (ok) {
-    showToast(`「${t.title}」をコピーしました`);
+    showToast(T('toastCopied', t.title || T('untitled')));
     if (element) {
       element.classList.add('copied');
       setTimeout(() => element.classList.remove('copied'), 700);
     }
   } else {
-    showToast('コピーに失敗しました', true);
+    showToast(T('toastCopyFailed'), true);
   }
 }
 
@@ -528,7 +591,7 @@ function openEdit(id) {
   editingId = id || null;
   const t = id ? templates.find((x) => x.id === id) : null;
   // 全文を読むために開くことも多いので、見出しは「編集」と言い切らない
-  $('editHeading').textContent = t ? '定型文の内容' : '定型文を追加';
+  $('editHeading').textContent = T(t ? 'editHeadingExisting' : 'editHeadingNew');
   $('btnCopyBody').hidden = !t;
   $('editCategory').value = t ? t.category : categoryFilter.value || '';
   $('editTitle').value = t ? t.title : '';
@@ -585,7 +648,7 @@ function updateEditState() {
   } else if (dirty) {
     notice.hidden = false;
     notice.className = 'edit-notice dirty';
-    $('editNoticeText').textContent = '保存していない変更があります';
+    $('editNoticeText').textContent = T('noticeDirty');
   } else {
     notice.hidden = true;
   }
@@ -596,11 +659,11 @@ function revertEdit() {
   if (!editBaseline) return;
   fillForm(editBaseline);
   updateEditState();
-  showToast('変更を取り消しました');
+  showToast(T('toastReverted'));
 }
 
 function leaveEdit() {
-  if (hasUnsavedChanges() && !confirm('保存していない変更があります。破棄して一覧に戻りますか？')) return;
+  if (hasUnsavedChanges() && !confirm(T('confirmLeave'))) return;
   showView('list');
 }
 
@@ -609,11 +672,12 @@ async function saveEdit() {
   const title = $('editTitle').value.trim();
   const body = $('editBody').value;
   if (!title && !body.trim()) {
-    showToast('概要か本文を入力してください', true);
+    showToast(T('toastNeedInput'), true);
     return;
   }
-  const label = `「${title || '（無題）'}」の${editingId ? '編集' : '追加'}`;
-  await captureUndo(label);
+  const shownTitle = title || T('untitled');
+  const isNew = !editingId;
+  await captureUndo(T(isNew ? 'labelAdd' : 'labelEdit', shownTitle));
 
   const now = Date.now();
   if (editingId) {
@@ -629,7 +693,7 @@ async function saveEdit() {
     templates.unshift(created);
     // 保存後もこの画面に留まるので、次に保存したとき二重登録にならないよう対象を切り替える
     editingId = created.id;
-    $('editHeading').textContent = '定型文の内容';
+    $('editHeading').textContent = T('editHeadingExisting');
     $('btnCopyBody').hidden = false;
   }
   await storage.set(templates);
@@ -641,11 +705,11 @@ async function saveEdit() {
   if (saved) fillForm(saved);
 
   // 一覧には戻らず、この場で取り消せるようにする
-  $('editNoticeText').textContent = `${label}を保存しました`;
+  $('editNoticeText').textContent = T(isNew ? 'noticeSavedAdd' : 'noticeSavedEdit', shownTitle);
   editJustSaved = true;
   setEditBaseline();
   updateEditState();
-  showToast('保存しました');
+  showToast(T('toastSaved'));
 }
 
 // 編集画面から直前の保存を取り消す
@@ -666,14 +730,15 @@ async function undoFromEdit() {
 async function deleteEditing() {
   if (!editingId) return;
   const t = templates.find((x) => x.id === editingId);
-  if (!confirm(`「${t ? t.title : ''}」を削除しますか？`)) return;
-  await captureUndo(`「${t ? t.title : ''}」の削除`);
+  const shownTitle = (t && t.title) || T('untitled');
+  if (!confirm(T('confirmDelete', shownTitle))) return;
+  await captureUndo(T('labelDelete', shownTitle));
   templates = templates.filter((x) => x.id !== editingId);
   await storage.set(templates);
   renderCategoryOptions();
   applyFilter();
   showView('list');
-  showToast('削除しました。⚙の「元に戻す」から取り消せます');
+  showToast(T('toastDeleted'));
 }
 
 // ===== CSV / TSV パーサー（ここから）=====
@@ -731,11 +796,13 @@ function parseDelimited(text, delimiter) {
   return rows.filter((r) => r.some((f) => f.trim() !== ''));
 }
 
-// 区切り文字の判定。拡張子で分かるならそれを使い、分からなければ先頭行のタブとカンマを数える
+// 区切り文字の判定。拡張子で分かるならそれを使い、分からなければ先頭行のタブとカンマを数える。
+// reason は表示用の文言ではなく手掛かりの種類を返す（このブロックは Node のテストから直接呼ばれるため、
+// 画面に出す文言はここでは組み立てない）
 function detectDelimiter(text, filename = '') {
   const ext = filename.toLowerCase().match(/\.([a-z0-9]+)$/);
-  if (ext && ext[1] === 'csv') return { delimiter: COMMA, reason: '拡張子から判定' };
-  if (ext && ext[1] === 'tsv') return { delimiter: TAB, reason: '拡張子から判定' };
+  if (ext && ext[1] === 'csv') return { delimiter: COMMA, reason: 'ext' };
+  if (ext && ext[1] === 'tsv') return { delimiter: TAB, reason: 'ext' };
 
   let tabs = 0;
   let commas = 0;
@@ -758,19 +825,17 @@ function detectDelimiter(text, filename = '') {
     }
   }
   // 同数（どちらも0を含む）ならタブ区切り扱い。スプレッドシート由来のTSVが既定のため
-  return { delimiter: tabs >= commas ? TAB : COMMA, reason: '先頭行から判定' };
-}
-
-function delimiterLabel(delimiter) {
-  return delimiter === TAB ? 'タブ区切り' : 'カンマ区切り';
+  return { delimiter: tabs >= commas ? TAB : COMMA, reason: 'firstLine' };
 }
 
 function delimitedField(s, delimiter) {
   return s.includes(delimiter) || /["\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
-function toDelimited(items, delimiter) {
-  const lines = [['カテゴリ', '概要', '本文'].map((h) => delimitedField(h, delimiter)).join(delimiter)];
+// ヘッダーは画面の言語に合わせて呼び出し側から渡す。既定は英語（Node のテストから直接呼ぶ場合用）。
+// どちらの言語で書き出しても rowsToTemplates がヘッダー行として読み飛ばせる
+function toDelimited(items, delimiter, headers = ['Category', 'Title', 'Body']) {
+  const lines = [headers.map((h) => delimitedField(h, delimiter)).join(delimiter)];
   for (const t of items) {
     lines.push(
       [t.category || '', t.title || '', t.body || ''].map((f) => delimitedField(f, delimiter)).join(delimiter)
@@ -815,25 +880,38 @@ function rowsToTemplates(rows) {
 }
 // ===== CSV / TSV パーサー（ここまで）=====
 
+// 表示用の文言。パーサー本体（上のブロック）は Node のテストから切り出して実行されるので、
+// T() を使う部分はブロックの外に置いている
+function delimiterLabel(delimiter) {
+  return T(delimiter === TAB ? 'delimTab' : 'delimComma');
+}
+
+function delimiterReasonLabel(reason) {
+  return T(reason === 'ext' ? 'reasonExt' : 'reasonFirstLine');
+}
+
+function localizedHeaders() {
+  return [T('headerCategory'), T('headerTitle'), T('headerBody')];
+}
+
 // 貼り付け・ファイル読み込みの共通処理。追記／置き換えの選択を適用して保存する
 async function runImport(rows, { backToList }) {
   const { imported, skipped } = rowsToTemplates(rows);
   if (imported.length === 0) {
-    const msg =
-      skipped > 0 ? `取り込める行がありませんでした（${skipped}行をスキップ）` : '取り込める行がありませんでした';
+    const msg = skipped > 0 ? T('importNoRowsSkipped', skipped) : T('importNoRows');
     showToast(msg, true);
     return { ok: false, imported: 0, skipped, message: msg };
   }
 
   const mode = document.querySelector('input[name="importMode"]:checked').value;
   if (mode === 'replace') {
-    if (!confirm(`既存の${templates.length}件を削除して、${imported.length}件で置き換えます。よろしいですか？`)) {
-      return { ok: false, cancelled: true, imported: 0, skipped, message: 'インポートを中止しました' };
+    if (!confirm(T('confirmReplace', templates.length, imported.length))) {
+      return { ok: false, cancelled: true, imported: 0, skipped, message: T('importCancelled') };
     }
-    await captureUndo(`${imported.length}件で置き換え`);
+    await captureUndo(T('labelReplace', imported.length));
     templates = imported;
   } else {
-    await captureUndo(`${imported.length}件のインポート`);
+    await captureUndo(T('labelImport', imported.length));
     templates = [...imported, ...templates];
   }
   await storage.set(templates);
@@ -842,9 +920,7 @@ async function runImport(rows, { backToList }) {
   if (backToList) showView('list');
 
   const message =
-    skipped > 0
-      ? `${imported.length}行を読み込み、${skipped}行をスキップしました`
-      : `${imported.length}件をインポートしました`;
+    skipped > 0 ? T('importDoneSkipped', imported.length, skipped) : T('importDone', imported.length);
   showToast(message);
   return { ok: true, imported: imported.length, skipped, message };
 }
@@ -853,7 +929,7 @@ async function runImport(rows, { backToList }) {
 async function importPasted() {
   const text = $('importText').value;
   if (!text.trim()) {
-    showToast('インポートするデータを貼り付けてください', true);
+    showToast(T('toastPasteEmpty'), true);
     return;
   }
   const result = await runImport(parseDelimited(stripBOM(text), TAB), { backToList: true });
@@ -879,29 +955,29 @@ function readFileAsText(file) {
 
 async function importFromFile(file) {
   if (!file) return;
-  setFileStatus(`${file.name} を読み込んでいます…`);
+  setFileStatus(T('fileReading', file.name));
 
   let text;
   try {
     text = stripBOM(await readFileAsText(file));
   } catch {
-    setFileStatus(`${file.name} を読み込めませんでした。`, true);
-    showToast('ファイルを読み込めませんでした', true);
+    setFileStatus(T('fileReadFailed', file.name), true);
+    showToast(T('toastFileReadFailed'), true);
     return;
   }
 
   if (!text.trim()) {
-    setFileStatus(`${file.name} は空のファイルでした。`, true);
-    showToast('ファイルが空です', true);
+    setFileStatus(T('fileEmpty', file.name), true);
+    showToast(T('toastFileEmpty'), true);
     return;
   }
 
   const { delimiter, reason } = detectDelimiter(text, file.name);
   const label = delimiterLabel(delimiter);
-  setFileStatus(`${file.name}：${label}として読み込みます（${reason}）`);
+  setFileStatus(T('fileDetecting', file.name, label, delimiterReasonLabel(reason)));
 
   const result = await runImport(parseDelimited(text, delimiter), { backToList: false });
-  setFileStatus(`${file.name}：${label}として読み込みました。${result.message}`, !result.ok);
+  setFileStatus(T('fileDone', file.name, label, result.message), !result.ok);
 }
 
 // ===== エクスポート =====
@@ -924,7 +1000,9 @@ function dateStamp() {
 }
 
 // ===== サンプル定型文 =====
-const SAMPLE_TEMPLATES = [
+// 画面の言語に合わせて出し分ける。日本語のサンプルは英語話者には読めず、
+// ストアの審査担当者も英語ロケールで触るため、英語版を別に用意している
+const SAMPLE_TEMPLATES_JA = [
   {
     category: '挨拶',
     title: '初回の挨拶（社外）',
@@ -977,8 +1055,62 @@ const SAMPLE_TEMPLATES = [
   },
 ];
 
+const SAMPLE_TEMPLATES_EN = [
+  {
+    category: 'Greetings',
+    title: 'First contact (external)',
+    body: 'Hello,\n\nMy name is [your name] from [company]. I am getting in touch about [subject].\n\nI look forward to working with you.\n\nBest regards,\n[your name]',
+  },
+  {
+    category: 'Requests',
+    title: 'Asking for documents',
+    body: 'Hello,\n\nCould you send over the material related to [subject]?\n\nIf you are able to get it to me by [date], that would be a great help.\n\nThank you,\n[your name]',
+  },
+  {
+    category: 'Requests',
+    title: 'Following up for a review',
+    body: 'Hello,\n\nI wanted to check whether you have had a chance to look at [subject] that I sent over on [date].\n\nHappy to answer any questions.\n\nThank you,\n[your name]',
+  },
+  {
+    category: 'Thanks',
+    title: 'After a meeting',
+    body: 'Hello,\n\nThank you for making time today. I appreciated the discussion.\n\nBased on what we agreed, I will move ahead with [next step] and come back to you by [date].\n\nBest regards,\n[your name]',
+  },
+  {
+    category: 'Scheduling',
+    title: 'Offering meeting times',
+    body: 'Hello,\n\nWould any of the following work for a meeting about [subject]?\n\n- [date], [time]\n- [date], [time]\n- [date], [time]\n\nEach slot is about [duration]. Let me know which suits you and I will send an invitation.\n\nThank you,\n[your name]',
+  },
+  {
+    category: 'Scheduling',
+    title: 'Asking to reschedule',
+    body: 'Hello,\n\nI am sorry to ask, but something has come up and I need to move our meeting on [date].\n\nI will send a few alternative times shortly. Apologies for the inconvenience.\n\nThank you for understanding,\n[your name]',
+  },
+  {
+    category: 'Apologies',
+    title: 'Late reply',
+    body: 'Hello,\n\nApologies for the slow reply on [subject].\n\nHere is where things stand: [details]\n\nThank you for your patience,\n[your name]',
+  },
+  {
+    category: 'Updates',
+    title: 'Sending an attachment',
+    body: 'Hello,\n\nPlease find the [subject] material attached.\n\nDo let me know if anything is unclear.\n\nBest regards,\n[your name]\n\nAttached: [filename]',
+  },
+  {
+    category: 'Updates',
+    title: 'Out of office',
+    body: 'Hello,\n\nI will be away from my desk all day on [date].\n\nIf it is urgent, please contact [colleague] at [email].\n\nThank you,\n[your name]',
+  },
+  {
+    category: 'Internal',
+    title: 'Meeting reminder',
+    body: 'Hi all,\n\nA reminder that the [subject] meeting starts at [time] today.\n\nWhere: [room, or the link in the invitation]\n\nThe material is in the shared folder — please take a look beforehand.\n\nThanks,\n[your name]',
+  },
+];
+
 async function loadSamples() {
-  await captureUndo(`サンプル${SAMPLE_TEMPLATES.length}件の追加`);
+  const SAMPLE_TEMPLATES = isJapaneseUI() ? SAMPLE_TEMPLATES_JA : SAMPLE_TEMPLATES_EN;
+  await captureUndo(T('labelSamples', SAMPLE_TEMPLATES.length));
   const now = Date.now();
   const items = SAMPLE_TEMPLATES.map((t, i) => ({
     id: uuid(),
@@ -990,7 +1122,7 @@ async function loadSamples() {
   await storage.set(templates);
   renderCategoryOptions();
   applyFilter();
-  showToast(`サンプル${items.length}件を追加しました`);
+  showToast(T('toastSamplesAdded', items.length));
 }
 
 // ===== イベント登録 =====
@@ -998,10 +1130,13 @@ searchInput.addEventListener('input', applyFilter);
 categoryFilter.addEventListener('change', applyFilter);
 
 $('btnNew').addEventListener('click', () => openEdit(null));
-$('btnIO').addEventListener('click', () => showView('io'));
+
+// ⚙ は開閉の両方を兼ねる。入出力画面から戻るのに一番下までスクロールしなくて済むよう、
+// もう一度押したら一覧に戻す（「一覧に戻る」ボタンも残してある）
+$('btnIO').addEventListener('click', () => showView(viewIO.hidden ? 'io' : 'list'));
 
 // 別ウィンドウで開くボタンは、拡張として動いていてサイドパネル側にいるときだけ出す
-if (canOpenWindow && !isPopupWindow) {
+if (canOpenWindow && !isPopupWindow && !isEmbedded) {
   $('btnPopout').hidden = false;
   $('btnPopout').addEventListener('click', openInWindow);
 }
@@ -1017,11 +1152,11 @@ $('btnCloseIO').addEventListener('click', () => showView('list'));
 $('btnCopyBody').addEventListener('click', async () => {
   const body = $('editBody').value;
   if (!body.trim()) {
-    showToast('本文が空です', true);
+    showToast(T('toastBodyEmpty'), true);
     return;
   }
   const ok = await copyText(body);
-  showToast(ok ? '本文をコピーしました' : 'コピーに失敗しました', !ok);
+  showToast(T(ok ? 'toastBodyCopied' : 'toastCopyFailed'), !ok);
 });
 
 $('btnSave').addEventListener('click', saveEdit);
@@ -1086,27 +1221,35 @@ window.addEventListener('drop', (e) => e.preventDefault());
 
 $('btnExportCSV').addEventListener('click', () => {
   // ExcelでそのままUTF-8として開けるようにBOMを付ける（読み込み側はBOMを除去する）
-  downloadFile(`osamukun_${dateStamp()}.csv`, '\uFEFF' + toDelimited(templates, COMMA), 'text/csv');
+  downloadFile(
+    `osamukun_${dateStamp()}.csv`,
+    '\uFEFF' + toDelimited(templates, COMMA, localizedHeaders()),
+    'text/csv'
+  );
 });
 $('btnExportTSV').addEventListener('click', () => {
-  downloadFile(`osamukun_${dateStamp()}.tsv`, toDelimited(templates, TAB), 'text/tab-separated-values');
+  downloadFile(
+    `osamukun_${dateStamp()}.tsv`,
+    toDelimited(templates, TAB, localizedHeaders()),
+    'text/tab-separated-values'
+  );
 });
 $('btnExportJSON').addEventListener('click', () => {
   downloadFile(`osamukun_${dateStamp()}.json`, JSON.stringify(templates, null, 2), 'application/json');
 });
 $('btnDeleteAll').addEventListener('click', async () => {
   if (templates.length === 0) {
-    showToast('削除する定型文がありません', true);
+    showToast(T('toastNothingToDelete'), true);
     return;
   }
-  if (!confirm(`全${templates.length}件の定型文を削除します。よろしいですか？`)) return;
-  await captureUndo(`全${templates.length}件の削除`);
+  if (!confirm(T('confirmDeleteAll', templates.length))) return;
+  await captureUndo(T('labelDeleteAll', templates.length));
   templates = [];
   await storage.set(templates);
   renderCategoryOptions();
   applyFilter();
   showView('list');
-  showToast('全て削除しました。⚙の「元に戻す」から取り消せます');
+  showToast(T('toastDeletedAll'));
 });
 
 $('btnLoadSamples').addEventListener('click', loadSamples);
@@ -1116,6 +1259,9 @@ $('btnUndo').addEventListener('click', performUndo);
 (async function init() {
   // 別ウィンドウが生きているならそちらに任せて閉じる。描画前に判定して画面のちらつきを避ける
   if (await handOverToExistingWindow()) return;
+  // 文言を先に用意する。この後の描画も T() を通るため、順序を入れ替えないこと
+  await loadPreviewMessages();
+  applyI18n();
   templates = await storage.get();
   renderCategoryOptions();
   applyFilter();

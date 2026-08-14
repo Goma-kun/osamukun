@@ -16,7 +16,7 @@ let seq = 0;
 const prelude = 'function uuid() { return "id" + (++__seq); }\nlet __seq = 0;\n';
 const mod = new Function(
   `${prelude}${block}
-   return { stripBOM, parseDelimited, detectDelimiter, delimiterLabel, delimitedField, toDelimited, rowsToTemplates, TAB, COMMA };`
+   return { stripBOM, parseDelimited, detectDelimiter, delimitedField, toDelimited, rowsToTemplates, TAB, COMMA };`
 )();
 
 const { stripBOM, parseDelimited, detectDelimiter, delimitedField, toDelimited, rowsToTemplates, TAB, COMMA } = mod;
@@ -109,8 +109,8 @@ console.log('== CRLF ==');
 
 console.log('== 区切り文字の自動判定 ==');
 {
-  check('拡張子 .csv', detectDelimiter('a\tb\tc\td', 'x.csv'), { delimiter: COMMA, reason: '拡張子から判定' });
-  check('拡張子 .tsv', detectDelimiter('a,b,c,d', 'x.tsv'), { delimiter: TAB, reason: '拡張子から判定' });
+  check('拡張子 .csv', detectDelimiter('a\tb\tc\td', 'x.csv'), { delimiter: COMMA, reason: 'ext' });
+  check('拡張子 .tsv', detectDelimiter('a,b,c,d', 'x.tsv'), { delimiter: TAB, reason: 'ext' });
   check('.txt でカンマ多数', detectDelimiter('カテゴリ,概要,本文\n', 'x.txt').delimiter, COMMA);
   check('.txt でタブ多数', detectDelimiter('カテゴリ\t概要\t本文\n', 'x.txt').delimiter, TAB);
   check('拡張子なし・同数はタブ', detectDelimiter('a\tb,c', '').delimiter, TAB);
@@ -142,6 +142,21 @@ console.log('== ヘッダー行の扱い ==');
   check('日本語ヘッダーを飛ばす', rowsToTemplates(parseDelimited('カテゴリ,概要,本文\nA,t,b\n', COMMA)).imported.length, 1);
   check('英語ヘッダーを飛ばす', rowsToTemplates(parseDelimited('category,title,body\nA,t,b\n', COMMA)).imported.length, 1);
   check('ヘッダーなしでも読める', rowsToTemplates(parseDelimited('A,t,b\n', COMMA)).imported.length, 1);
+}
+
+console.log('== 書き出しヘッダーは言語ごとに変わっても読み戻せる ==');
+{
+  // v1.8.0 でヘッダーを画面の言語に合わせるようにした。どちらで書き出しても
+  // 自分で読み戻せること（＝ヘッダー行が定型文として混ざらないこと）を確認する
+  for (const [name, headers] of [
+    ['既定（英語）', undefined],
+    ['日本語', ['カテゴリ', '概要', '本文']],
+    ['英語', ['Category', 'Title', 'Body']],
+  ]) {
+    const csv = toDelimited(DATA, COMMA, headers);
+    const { imported, skipped } = rowsToTemplates(parseDelimited(csv, COMMA));
+    check(`${name}ヘッダーの往復`, [imported.length, skipped], [DATA.length, 0]);
+  }
 }
 
 console.log('== 本文だけ空の行は取り込む（v1.0.0の挙動維持） ==');

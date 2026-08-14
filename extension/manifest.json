@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "おさむくん - 定型文検索・コピー",
-  "version": "1.7.1",
+  "name": "__MSG_extName__",
+  "version": "1.8.1",
+  "default_locale": "en",
   "minimum_chrome_version": "114",
-  "description": "定型文（テンプレート・スニペット）を登録・検索して、ワンクリックでコピー。メールの定型文管理に。完全オフライン動作。",
+  "description": "__MSG_extDescription__",
   "permissions": [
     "sidePanel",
     "storage"
@@ -12,7 +13,7 @@
     "default_path": "sidepanel.html"
   },
   "action": {
-    "default_title": "おさむくんを開く",
+    "default_title": "__MSG_actionTitle__",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
@@ -22,9 +23,15 @@
   "background": {
     "service_worker": "background.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["sidepanel.html"],
+      "extension_ids": ["mdheihoolmkhoebieolpoacbfcmccnha"]
+    }
+  ],
   "commands": {
     "_execute_action": {
-      "description": "おさむくんのサイドパネルを開く"
+      "description": "__MSG_commandDescription__"
     }
   },
   "icons": {

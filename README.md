@@ -3,9 +3,12 @@
 定型文（テンプレート・スニペット）を登録・検索して、ワンクリックでコピーできるChrome拡張機能です。
 メールの定型文管理を想定していますが、よく使う文章なら何でも登録できます。
 
+*English speakers: see [English](#english) at the bottom.*
+
 ## 特徴
 
 - **サイドパネル型**：ブラウザの横に常駐。ツールバーのアイコンをクリックで開閉
+- **入出力画面の開閉**：ヘッダーの ⚙ を押すと入出力画面へ、もう一度押すと一覧に戻ります
 - **別ウィンドウ表示**：ヘッダーの ⧉ ボタンで独立したウィンドウに切り替わります。位置もサイズも自由で、Chrome以外のアプリに貼り付けるときも手前に置いておけます。別ウィンドウの ⇥ ボタンでサイドパネルに戻せます。二重に表示されることはありません
 - **インクリメンタル検索**：タイトル・本文・カテゴリを対象に、入力と同時に絞り込み
 - **ワンクリックコピー**：項目をクリックすると本文がクリップボードへ
@@ -17,6 +20,7 @@
 - **エクスポート**：CSV・TSV・JSONの3形式でバックアップ
 - **元に戻す**：保存・追加・削除・インポートを、直前のひとつだけ取り消せます。保存した直後はその場に「元に戻す」が出ますし、あとからでも ⚙ の画面から取り消せます
 - **完全オフライン**：外部通信は一切ありません。データは `chrome.storage.local` にのみ保存されます
+- **日本語・英語のUI**：Chromeの表示言語に合わせて切り替わります（`_locales` による i18n）
 
 ## 権限
 
@@ -72,6 +76,14 @@ node test/parser_test.mjs
 ```
 
 ## 変更履歴
+
+### v1.8.0（2026-08-10）
+
+- **画面を英語に対応しました。** Chromeの表示言語が日本語なら日本語、それ以外なら英語で表示されます（`_locales/ja`・`_locales/en`）
+- サンプル定型文も画面の言語に合わせて出し分けます。英語のときは英語のビジネス定型文10件を読み込みます
+- CSV／TSVを書き出すときのヘッダー行（カテゴリ／概要／本文）も画面の言語に合わせます。どちらの言語で書き出しても、そのまま読み戻せます
+- Chrome ウェブストアの掲載情報も日英2言語になりました
+- **⚙ をもう一度押すと一覧に戻る**ようにしました。入出力画面から戻るのに一番下までスクロールしなくて済みます（「一覧に戻る」ボタンもそのまま残してあります）
 
 ### v1.7.1（2026-08-04）
 
@@ -139,5 +151,78 @@ node test/parser_test.mjs
 - 初回リリース。検索・カテゴリフィルタ・クリックコピー・追加編集削除・TSV貼り付けインポート・TSV/JSONエクスポート
 
 ## ライセンス
+
+MIT
+
+---
+
+## English
+
+**Osamukun** is a Chrome extension for the text you write over and over: save it, search it, copy it with one click. It was built for email templates, but anything you retype works — greetings, status formats, support replies, prompts for an AI chat.
+
+### What it does
+
+- **Lives in the side panel.** Click the toolbar icon to open and close it
+- **Or in a window of its own.** The ⧉ button in the header moves it to a separate window you can size and place anywhere, so it stays in front of apps outside Chrome. ⇥ moves it back. It never shows up in two places at once
+- **Search as you type**, across title, body and category
+- **Click to copy.** The body goes straight to your clipboard
+- **"Full text"** opens the whole entry, where you can read, edit, save and copy it. When you only opened it to read, no save button appears — so an accidental edit is visible before it becomes permanent
+- **Keyboard only, if you like.** The search box is focused when it opens; ↑↓ to move, Enter to copy, Esc to clear
+- **A shortcut key, if you want one.** No default is set (see below)
+- **Paste from a spreadsheet.** Select three columns — category, title, body — copy, paste
+- **Read CSV and TSV files**, by choosing a file or dropping it in
+- **Export** as CSV, TSV or JSON, and read what you exported straight back in
+- **Undo.** Saving, adding, deleting and importing can each be taken back — the last one is always kept
+- **Fully offline.** No network code at all. Your data lives in `chrome.storage.local` on your own machine
+- **English and Japanese**, following your Chrome language setting
+
+### Permissions
+
+`sidePanel` and `storage`, and nothing else. No host permissions, no content scripts, no remote code. Files are read with `FileReader`, so no file permission is needed either.
+
+Osamukun copies to your clipboard rather than typing into the field for you. That is deliberate: inserting text into a page requires permission to read that page, and this extension does not ask for it.
+
+### Keyboard shortcut
+
+Clicking the toolbar icon opens the side panel. To open it from the keyboard, go to `chrome://extensions/shortcuts` and assign a key to "Open the Osamukun side panel".
+
+**No default key is set, on purpose.** Chrome hands shortcuts out first-come-first-served, and an extension that loses gets no warning — the key is simply unassigned. Whatever default we picked would silently collide in someone's browser, so you choose one that is free.
+
+### Import format
+
+Three columns: category, title, body. A first row starting with `category` (or `カテゴリ`) is treated as a header and skipped.
+
+- The delimiter is detected for you. A `.csv` or `.tsv` extension decides it; otherwise the commas and tabs in the first line are counted
+- Files are read as UTF-8. A BOM (as Excel writes) is fine
+- LF and CRLF line endings both work
+- Wrap a cell in double quotes if it contains a comma, tab, newline or quote (`""` escapes a quote itself)
+- Rows that do not fit into three columns are skipped, and the count is shown on screen
+
+CSV export includes a BOM so Excel opens it correctly; the import side strips it, so anything you export reads straight back in.
+
+### Install (development build)
+
+1. Download this repository
+2. Open `chrome://extensions` in Chrome
+3. Turn on "Developer mode" (top right)
+4. Choose "Load unpacked" and select the `extension` folder
+
+### A note on backups
+
+Your data lives only in `chrome.storage.local` in your own browser. It is never synced, so no one else can lose it for you — but no one else can recover it for you either.
+
+Undo is there to catch the last mistake, not to be a backup. For anything you would not want to retype, export a CSV from the ⚙ screen. That CSV reads straight back in.
+
+### Tests
+
+The CSV/TSV parser inside `sidepanel.js` is extracted and checked for round-trip integrity and delimiter detection:
+
+```bash
+node test/parser_test.mjs
+```
+
+It is not part of what ships (it lives outside `extension/`).
+
+### License
 
 MIT
