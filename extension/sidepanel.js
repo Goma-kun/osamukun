@@ -409,6 +409,28 @@ async function handOverToExistingWindow() {
   return true;
 }
 
+// サイドパネルとして開かれたとき、別のウィンドウで既にサイドパネルが開いていればそちらへ寄せる。
+// アイコンをクリックするたびにウィンドウごとへ増えていくのを防ぐ（既存を前面に出す）。
+// 同じウィンドウで開き直したときは寄せない（それは普通の開閉なので）
+async function handOverToExistingSidePanel() {
+  if (isPopupWindow || isEmbedded || !canOpenWindow) return false;
+  if (typeof chrome.runtime.getContexts !== 'function') return false; // Chrome 116未満
+  try {
+    const self = await getOwnWindow();
+    if (!self) return false;
+    const contexts = await chrome.runtime.getContexts({ contextTypes: ['SIDE_PANEL'] });
+    // frameId 0 以外は、まとめるくん（ハブ）に埋め込まれた自分の iframe なので対象にしない
+    const other = contexts.find((c) => (c.frameId ?? 0) === 0 && c.windowId != null && c.windowId !== self.id);
+    if (!other) return false;
+    await chrome.windows.update(other.windowId, { focused: true, drawAttention: true });
+    window.close();
+    return true;
+  } catch {
+    // 判定に失敗したら普通に表示する（二重表示になっても実害は表示だけ）
+    return false;
+  }
+}
+
 // ===== 他のウィンドウとの同期 =====
 // サイドパネルと別ウィンドウを同時に開けるので、片方の変更をもう片方に反映する
 let pendingTemplates = null;
@@ -1259,6 +1281,8 @@ $('btnUndo').addEventListener('click', performUndo);
 (async function init() {
   // 別ウィンドウが生きているならそちらに任せて閉じる。描画前に判定して画面のちらつきを避ける
   if (await handOverToExistingWindow()) return;
+  // 別のウィンドウでサイドパネルが開いているなら、そちらを前面に出して閉じる
+  if (await handOverToExistingSidePanel()) return;
   // 文言を先に用意する。この後の描画も T() を通るため、順序を入れ替えないこと
   await loadPreviewMessages();
   applyI18n();
