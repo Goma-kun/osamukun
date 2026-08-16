@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "default_locale": "en",
   "minimum_chrome_version": "114",
   "description": "__MSG_extDescription__",
@@ -25,8 +25,13 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["sidepanel.html"],
-      "extension_ids": ["mdheihoolmkhoebieolpoacbfcmccnha"]
+      "resources": [
+        "sidepanel.html"
+      ],
+      "extension_ids": [
+        "mdheihoolmkhoebieolpoacbfcmccnha",
+        "mcnbbionolonioghmfnamegdpjmmeldb"
+      ]
     }
   ],
   "commands": {
