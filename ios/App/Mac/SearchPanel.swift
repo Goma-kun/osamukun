@@ -54,7 +54,9 @@ final class SearchPanelController {
         place(p)
         p.makeKeyAndOrderFront(nil)
         installMonitors(p)
+        // SwiftUI の中の NSTextField は最初の描画のあとにできるので、今と次の周回の両方で向ける
         focusField(p)
+        DispatchQueue.main.async { [weak self] in self?.focusField(p) }
     }
 
     /// 検索欄にキーボードを向ける。前面のアプリを変えないパネルでは SwiftUI の @FocusState が効かないので、
@@ -287,6 +289,8 @@ struct PanelSearchField: NSViewRepresentable {
         f.cell?.isScrollable = true
         f.setContentHuggingPriority(.defaultLow, for: .horizontal)
         f.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        // 作られた直後に自分へキーボードを向ける（パネルを初めて開いたとき用）
+        DispatchQueue.main.async { f.window?.makeFirstResponder(f) }
         return f
     }
 
