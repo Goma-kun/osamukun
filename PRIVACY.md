@@ -1,6 +1,9 @@
 # プライバシーポリシー / Privacy Policy
 
-最終更新日: 2026-08-04
+最終更新日 / Last updated: 2026-10-26
+
+このポリシーは、**Chrome 拡張機能版**と **Mac / iPhone アプリ版**に適用されます。
+This policy covers the **Chrome extension** and the **Mac / iPhone app**.
 
 ## 日本語
 
@@ -27,8 +30,18 @@
 
 閲覧中のページを読み取る権限（host_permissions）、ページにコードを差し込む仕組み（content script）、外部から取得したコードの実行（remote code）は、いずれも使用していません。
 
+### Mac / iPhone アプリ版について
+
+アプリ版も、集めない・送らないという方針は拡張機能版と同じです。
+
+- 登録した定型文は、お使いの端末の中（アプリ専用の保存領域）にのみ保存されます。開発者が運用するサーバーはありません
+- アクセス解析・トラッキング・広告は行いません。アカウント登録やログインは不要です
+- **直接貼り付け（Mac 版）**：選んだ本文を直前に使っていたアプリへ貼り付けるために、macOS の「アクセシビリティ」の許可をお願いすることがあります。この許可は、クリップボードに入れた本文を ⌘V のキー操作で貼り付けるためだけに使います。画面の内容や他のアプリの入力を読み取ることはありません。許可しなくても、クリップボードにコピーするところまでは使えます
+- **ファイルの読み込み／書き出し**：CSV／TSV／JSON ファイルは、あなたが選んだものだけを読み、アプリの外には送りません
+- 拡張機能版とアプリ版の間で、データが自動的に共有されることはありません（書き出したファイルを読み込む形で移せます）
+
 ### データの削除
-登録した定型文は、拡張機能の入出力画面から「全ての定型文を削除」でいつでも消去できます。Chromeから本拡張機能をアンインストールした場合も、保存されたデータは削除されます。
+登録した定型文は、拡張機能・アプリの入出力画面から「全ての定型文を削除」でいつでも消去できます。Chromeから本拡張機能をアンインストールした場合、またはアプリを削除した場合も、保存されたデータは削除されます。
 
 ### お問い合わせ
 本ポリシーに関するご質問は、GitHubリポジトリ（https://github.com/Goma-kun/osamukun）のIssueよりご連絡ください。
@@ -60,8 +73,18 @@ The Extension requests only two permissions: `sidePanel` and `storage`.
 
 The Extension does not use host permissions, content scripts, or remote code.
 
+### Mac / iPhone App
+
+The app follows the same rule as the extension: nothing is collected, nothing is sent.
+
+- Your templates are stored only on your device, in the app's own storage. There is no server run by the developer
+- No analytics, tracking or advertising. No account or sign-in is required
+- **Direct paste (Mac)**: to paste the chosen text into the app you were using, Osamukun may ask for macOS "Accessibility" permission. It is used only to send the ⌘V keystroke after the text is placed on the clipboard. Osamukun does not read your screen or what you type in other apps. Without the permission, it still copies to the clipboard
+- **Import / export**: only the CSV, TSV or JSON file you choose is read, and it never leaves the app
+- Data is not shared automatically between the extension and the app (you can move it by exporting and importing a file)
+
 ### Deleting Your Data
-You can erase all saved templates at any time from the import/export screen ("Delete all templates"). Uninstalling the Extension from Chrome also removes the stored data.
+You can erase all saved templates at any time from the import/export screen of the extension or the app ("Delete all templates"). Uninstalling the Extension from Chrome, or deleting the app, also removes the stored data.
 
 ### Contact
 For questions about this policy, please open an issue on the GitHub repository: https://github.com/Goma-kun/osamukun

@@ -4,3 +4,16 @@ osamukun-*.zip
 
 # 申請用の内部メモ。アカウント情報を含むので公開しない
 STORE_LISTING.md
+
+# Swift のビルド成果物
+ios/.build/
+ios/.build-*/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/
+
+# App Store の内部メモ・素材（アカウント情報を含むので公開しない）
+STORE_LISTING_IOS.md
+store-assets-ios/
+
+# ASC の API キー（絶対に入れない）
+AuthKey_*.p8

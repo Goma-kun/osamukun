@@ -1,0 +1,1496 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "%@ は UTF-8 のテキストではありませんでした": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is not UTF-8 text"
+          }
+        }
+      }
+    },
+    "%@ は空のファイルでした": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is empty"
+          }
+        }
+      }
+    },
+    "%@ を JSON として読めませんでした": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not read %@ as JSON"
+          }
+        }
+      }
+    },
+    "%@ をやり直しました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redid %@"
+          }
+        }
+      }
+    },
+    "%@ を取り消しました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undid %@"
+          }
+        }
+      }
+    },
+    "%@ を読み込めませんでした。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not read %@."
+          }
+        }
+      }
+    },
+    "%@ を読み込んでいます…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading %@…"
+          }
+        }
+      }
+    },
+    "%@：%@として読み込みました（%@）。%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: read as %2$@ (%3$@). %4$@"
+          }
+        }
+      }
+    },
+    "%lld件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld entries"
+          }
+        }
+      }
+    },
+    "%lld件 / 全%lld件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "%lld件で置き換え": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "replacing everything with %lld entries"
+          }
+        }
+      }
+    },
+    "%lld件のインポート": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "importing %lld entries"
+          }
+        }
+      }
+    },
+    "%lld件をインポートしました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported %lld entries"
+          }
+        }
+      }
+    },
+    "%lld行を読み込み、%lld行をスキップしました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read %1$lld rows, skipped %2$lld"
+          }
+        }
+      }
+    },
+    "CSVで保存": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as CSV"
+          }
+        }
+      }
+    },
+    "CSV・TSV に対応しています。区切り文字（カンマ／タブ）は自動で判定します。Chrome 拡張版おさむくんの JSON も読めます。文字コードは UTF-8 で保存してください。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSV and TSV are supported; the delimiter (comma or tab) is detected for you. JSON exported by the Osamukun Chrome extension can be read too. Files must be UTF-8."
+          }
+        }
+      }
+    },
+    "JSONで保存": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as JSON"
+          }
+        }
+      }
+    },
+    "TSVで保存": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as TSV"
+          }
+        }
+      }
+    },
+    "esc 閉じる": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "esc close"
+          }
+        }
+      }
+    },
+    "↩ コピー（貼り付けには許可が必要です）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↩ copy (pasting needs permission)"
+          }
+        }
+      }
+    },
+    "↩ 貼り付け": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↩ paste"
+          }
+        }
+      }
+    },
+    "⌘↩ コピーだけ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘↩ copy only"
+          }
+        }
+      }
+    },
+    "「%@」の削除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "deleting “%@”"
+          }
+        }
+      }
+    },
+    "「%@」の編集": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "editing “%@”"
+          }
+        }
+      }
+    },
+    "「%@」の編集を保存しました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved changes to “%@”"
+          }
+        }
+      }
+    },
+    "「%@」の追加": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "adding “%@”"
+          }
+        }
+      }
+    },
+    "「%@」の追加を保存しました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved “%@”"
+          }
+        }
+      }
+    },
+    "「%@」をコピーしました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied “%@”"
+          }
+        }
+      }
+    },
+    "「%@」をコピーしました。⌘V で貼り付けてください": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied “%@”. Press ⌘V to paste"
+          }
+        }
+      }
+    },
+    "「%@」を削除しますか？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete “%@”?"
+          }
+        }
+      }
+    },
+    "「%@」を貼り付けました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasted “%@”"
+          }
+        }
+      }
+    },
+    "「定型文を管理」で追加するか、サンプルを読み込んでください": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add some in “Manage Templates”, or load the samples"
+          }
+        }
+      }
+    },
+    "「新規」から1件ずつ追加できます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use “New” to add them one at a time."
+          }
+        }
+      }
+    },
+    "おさむくん": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Osamukun"
+          }
+        }
+      }
+    },
+    "おさむくんの設定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Osamukun Settings"
+          }
+        }
+      }
+    },
+    "おさむくんを終了": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit Osamukun"
+          }
+        }
+      }
+    },
+    "ここにファイルをドロップ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop a file here"
+          }
+        }
+      }
+    },
+    "このアプリについて": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        }
+      }
+    },
+    "このキーは登録できませんでした。別のキーにしてください": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That key could not be registered. Please choose another"
+          }
+        }
+      }
+    },
+    "すべてのカテゴリ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All categories"
+          }
+        }
+      }
+    },
+    "すべてを選択": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select All"
+          }
+        }
+      }
+    },
+    "どのアプリを使っていても、このキーで検索パネルが開きます。⌘・⌥・⌃ のどれかを含むキーにしてください。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This key opens the search panel from any app. Include at least one of ⌘, ⌥ or ⌃."
+          }
+        }
+      }
+    },
+    "またはクリックしてファイルを選択（.csv / .tsv / .txt / .json）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "or click to choose a file (.csv / .tsv / .txt / .json)"
+          }
+        }
+      }
+    },
+    "まだ許可されていません": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not allowed yet"
+          }
+        }
+      }
+    },
+    "やめる": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "やり直す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redo"
+          }
+        }
+      }
+    },
+    "やり直せる操作：%@（%@）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can redo: %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "インポート": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import"
+          }
+        }
+      }
+    },
+    "インポートするデータを貼り付けてください": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste the data to import first"
+          }
+        }
+      }
+    },
+    "インポート／エクスポート": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import / Export"
+          }
+        }
+      }
+    },
+    "インポート／エクスポート／元に戻す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import, export and undo"
+          }
+        }
+      }
+    },
+    "エクスポート": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        }
+      }
+    },
+    "カット": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut"
+          }
+        }
+      }
+    },
+    "カテゴリ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Category"
+          }
+        }
+      }
+    },
+    "カテゴリで絞り込み": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter by category"
+          }
+        }
+      }
+    },
+    "カンマ区切り": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "comma-separated"
+          }
+        }
+      }
+    },
+    "キーを押してください…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press a key…"
+          }
+        }
+      }
+    },
+    "コピー": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        }
+      }
+    },
+    "コピーされる本文": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The text that gets copied"
+          }
+        }
+      }
+    },
+    "サンプル%lld件の追加": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "adding %lld samples"
+          }
+        }
+      }
+    },
+    "サンプル%lld件を追加しました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added %lld sample templates"
+          }
+        }
+      }
+    },
+    "サンプル定型文を読み込む": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load sample templates"
+          }
+        }
+      }
+    },
+    "システム設定を開く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open System Settings"
+          }
+        }
+      }
+    },
+    "スプレッドシートから貼り付け": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste from a spreadsheet"
+          }
+        }
+      }
+    },
+    "スプレッドシートで3列を範囲コピーして、下に貼り付けてください。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy three columns from your spreadsheet and paste them below."
+          }
+        }
+      }
+    },
+    "スプレッドシートでカテゴリ／概要／本文の3列を選択してコピーし、入出力画面に貼り付けると、そのまま取り込めます。CSV・TSV ファイルや、Chrome 拡張版おさむくんの書き出しも読み込めます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select three columns in a spreadsheet (category, title, body), copy them and paste into the Import screen. CSV and TSV files, and exports from the Osamukun Chrome extension, can be read too."
+          }
+        }
+      }
+    },
+    "タブ区切り": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tab-separated"
+          }
+        }
+      }
+    },
+    "データの削除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete data"
+          }
+        }
+      }
+    },
+    "データはこの Mac の中にだけ保存されます。外部に送ることはありません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your data is stored only on this Mac. Nothing is sent anywhere."
+          }
+        }
+      }
+    },
+    "バージョン": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        }
+      }
+    },
+    "ファイルから読み込む": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read from a file"
+          }
+        }
+      }
+    },
+    "ファイルを読み込めませんでした": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not read the file"
+          }
+        }
+      }
+    },
+    "ペースト": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste"
+          }
+        }
+      }
+    },
+    "ログイン時におさむくんを起動": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Osamukun at login"
+          }
+        }
+      }
+    },
+    "ログイン時の起動を変更できませんでした：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not change the login setting: %@"
+          }
+        }
+      }
+    },
+    "一覧の「コピー」で本文がクリップボードに入ります": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“Copy” in the list puts the body on your clipboard"
+          }
+        }
+      }
+    },
+    "例：依頼": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e.g. Requests"
+          }
+        }
+      }
+    },
+    "例：資料送付のお願い": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e.g. Asking for documents"
+          }
+        }
+      }
+    },
+    "保存": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        }
+      }
+    },
+    "保存していない変更があります": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have unsaved changes"
+          }
+        }
+      }
+    },
+    "保存しました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        }
+      }
+    },
+    "保存できませんでした：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save: %@"
+          }
+        }
+      }
+    },
+    "元に戻す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo"
+          }
+        }
+      }
+    },
+    "先頭行から判定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "detected from the first line"
+          }
+        }
+      }
+    },
+    "入出力": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import / Export"
+          }
+        }
+      }
+    },
+    "全%lld件の削除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "deleting all %lld entries"
+          }
+        }
+      }
+    },
+    "全%lld件の定型文を削除します。よろしいですか？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete all %lld templates?"
+          }
+        }
+      }
+    },
+    "全ての定型文を削除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete all templates"
+          }
+        }
+      }
+    },
+    "全て削除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete All"
+          }
+        }
+      }
+    },
+    "全て削除しました。入出力の「元に戻す」から取り消せます": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleted everything. Undo is in Import / Export"
+          }
+        }
+      }
+    },
+    "全て置き換える": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace all"
+          }
+        }
+      }
+    },
+    "削除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        }
+      }
+    },
+    "削除しました。入出力の「元に戻す」から取り消せます": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleted. Undo is in Import / Export"
+          }
+        }
+      }
+    },
+    "削除する定型文がありません": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is nothing to delete"
+          }
+        }
+      }
+    },
+    "取り消した操作をやり直す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redo the undone action"
+          }
+        }
+      }
+    },
+    "取り消す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo"
+          }
+        }
+      }
+    },
+    "取り消せる操作がありません": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to undo"
+          }
+        }
+      }
+    },
+    "取り消せる操作はありません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to undo."
+          }
+        }
+      }
+    },
+    "取り消せる操作：%@（%@）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can undo: %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "取り込む列は「カテゴリ／概要／本文」の3列です。下の設定は貼り付け・ファイル読み込みの両方に適用されます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Three columns are read: category, title and body. The setting below applies to both pasting and reading files."
+          }
+        }
+      }
+    },
+    "取り込める行がありませんでした": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No rows could be imported"
+          }
+        }
+      }
+    },
+    "取り込める行がありませんでした（%lld行をスキップ）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No rows could be imported (%lld skipped)"
+          }
+        }
+      }
+    },
+    "呼び出し": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut"
+          }
+        }
+      }
+    },
+    "呼び出しキー": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut key"
+          }
+        }
+      }
+    },
+    "呼び出し：": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut: "
+          }
+        }
+      }
+    },
+    "変更…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change…"
+          }
+        }
+      }
+    },
+    "変更を取り消しました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes discarded"
+          }
+        }
+      }
+    },
+    "変更を取り消す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard changes"
+          }
+        }
+      }
+    },
+    "定型文": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Templates"
+          }
+        }
+      }
+    },
+    "定型文がまだありません": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No templates yet"
+          }
+        }
+      }
+    },
+    "定型文の内容": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Template"
+          }
+        }
+      }
+    },
+    "定型文を検索して貼り付け": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search and Paste a Template"
+          }
+        }
+      }
+    },
+    "定型文を検索（概要・本文・カテゴリ）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search templates (title, body, category)"
+          }
+        }
+      }
+    },
+    "定型文を管理…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage Templates…"
+          }
+        }
+      }
+    },
+    "定型文を追加": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a template"
+          }
+        }
+      }
+    },
+    "左の一覧から定型文を選ぶと、ここに全文が出ます": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a template on the left to see its full text here"
+          }
+        }
+      }
+    },
+    "拡張子から判定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "detected from the file extension"
+          }
+        }
+      }
+    },
+    "新しい定型文を追加": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a new template"
+          }
+        }
+      }
+    },
+    "新規": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New"
+          }
+        }
+      }
+    },
+    "既存の%lld件を削除して置き換えます。よろしいですか？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete the existing %lld entries and replace them?"
+          }
+        }
+      }
+    },
+    "既定に戻す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset to default"
+          }
+        }
+      }
+    },
+    "本文": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body"
+          }
+        }
+      }
+    },
+    "本文が空です": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The body is empty"
+          }
+        }
+      }
+    },
+    "本文をクリップボードへ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy the body to the clipboard"
+          }
+        }
+      }
+    },
+    "本文をコピー": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy body"
+          }
+        }
+      }
+    },
+    "本文をコピーしました": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied the body"
+          }
+        }
+      }
+    },
+    "検索語やカテゴリを変えてみてください。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try a different search or category."
+          }
+        }
+      }
+    },
+    "検索（概要・本文・カテゴリ）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search (title, body, category)"
+          }
+        }
+      }
+    },
+    "概要": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Title"
+          }
+        }
+      }
+    },
+    "概要か本文を入力してください": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a title or a body"
+          }
+        }
+      }
+    },
+    "概要（一覧に表示されるタイトル）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Title (shown in the list)"
+          }
+        }
+      }
+    },
+    "登録済みのカテゴリから選ぶ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick an existing category"
+          }
+        }
+      }
+    },
+    "登録済みの定型文をファイルとして保存します。CSV・TSV は読み込みにそのまま使えますし、Chrome 拡張版おさむくんでも読めます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save your templates as a file. CSV and TSV can be read straight back in, and by the Osamukun Chrome extension too."
+          }
+        }
+      }
+    },
+    "直前の操作をひとつだけ取り消せます。保存・追加・削除・インポートが対象です。もう一度押すと取り消した操作をやり直せます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo the last action: saving, adding, deleting or importing. Press again to redo it."
+          }
+        }
+      }
+    },
+    "直前の操作を取り消す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo the last action"
+          }
+        }
+      }
+    },
+    "直接貼り付け": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct paste"
+          }
+        }
+      }
+    },
+    "編集": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        }
+      }
+    },
+    "置き換える": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace"
+          }
+        }
+      }
+    },
+    "見つかりませんでした": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matches"
+          }
+        }
+      }
+    },
+    "設定…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings…"
+          }
+        }
+      }
+    },
+    "許可されています": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allowed"
+          }
+        }
+      }
+    },
+    "許可する…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow…"
+          }
+        }
+      }
+    },
+    "貼り付け": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasting"
+          }
+        }
+      }
+    },
+    "貼り付けた内容をインポート": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import the pasted text"
+          }
+        }
+      }
+    },
+    "起動": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Startup"
+          }
+        }
+      }
+    },
+    "追記する": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Append"
+          }
+        }
+      }
+    },
+    "選んだ本文を、直前に使っていたアプリへそのまま貼り付けるには、システム設定 › プライバシーとセキュリティ › アクセシビリティ で「おさむくん」をオンにしてください。許可が無いときはクリップボードにコピーするところまで行い、⌘V は自分で押す形になります。おさむくんは画面の内容を読みません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To paste the chosen text straight into the app you were using, turn on “Osamukun” under System Settings › Privacy & Security › Accessibility. Without it, Osamukun copies to the clipboard and you press ⌘V yourself. Osamukun never reads what is on your screen."
+          }
+        }
+      }
+    },
+    "閉じる": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        }
+      }
+    },
+    "（無題）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(untitled)"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

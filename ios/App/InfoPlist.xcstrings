@@ -1,0 +1,18 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Osamukun" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "おさむくん" } }
+      }
+    },
+    "CFBundleName" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Osamukun" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "おさむくん" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
