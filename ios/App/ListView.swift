@@ -32,6 +32,8 @@ struct ManageView: View {
             }
         }
         .sheet(isPresented: $showIO) { IOView().environmentObject(model) }
+        .onAppear { if model.ioRequested { model.ioRequested = false; showIO = true } }
+        .onChange(of: model.ioRequested) { _, v in if v { model.ioRequested = false; showIO = true } }
         .overlay(alignment: .bottom) { ToastView(toast: model.toast) }
         .background(Theme.bg)
     }

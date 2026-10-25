@@ -144,6 +144,7 @@ struct EditView: View {
         justSaved = false
         baseline = (category, title, body_)
         focus = isNew ? .title : nil
+        if Shot.dirty { body_ += "\n\n（追記中の文）" }   // 撮影用。Release では常に false
     }
 
     private func save() {

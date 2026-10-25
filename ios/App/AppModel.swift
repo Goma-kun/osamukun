@@ -15,6 +15,8 @@ final class AppModel: ObservableObject {
     @Published var selectedID: String?
     /// 画面下に出す一言（1.8 秒で消える）
     @Published var toast: Toast?
+    /// 管理ウィンドウに「入出力を開いて」と頼む印（撮影フックと、メニューから開くときに使う）
+    @Published var ioRequested = false
 
     struct Toast: Equatable { var text: String; var isError = false; var id = UUID() }
 

@@ -41,6 +41,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         HotKey.shared.onPress = { SearchPanelController.shared.toggle() }
         HotKey.shared.register()
         ensureEditMenu()
+        if let mode = Shot.mode {
+            Shot.run(mode)
+            return
+        }
         // 初回だけ管理ウィンドウを開いて、何のアプリか分かるようにする（2 回目からはメニューバーだけ）
         if !UserDefaults.standard.bool(forKey: "didOpenOnce") {
             UserDefaults.standard.set(true, forKey: "didOpenOnce")
@@ -123,3 +127,45 @@ enum AppWindows {
     }
 }
 #endif
+
+/// App Store 用スクリーンショットの撮影フック。**Release では何もしない。**
+/// SwiftUI のボタンは合成クリックで押せないので、開く画面を起動引数で指定して `screencapture -l` で窓だけ撮る
+///   -OKShot panel|manage|edit|io|settings   開く画面
+///   -OKShotQuery 打ち合わせ                   パネルの検索語
+///   -OKShotDirty 1                           全文の画面を「保存していない変更があります」の状態にする
+enum Shot {
+    static var mode: String? {
+        #if DEBUG
+        return UserDefaults.standard.string(forKey: "OKShot")
+        #else
+        return nil
+        #endif
+    }
+    static var dirty: Bool {
+        #if DEBUG
+        return UserDefaults.standard.bool(forKey: "OKShotDirty")
+        #else
+        return false
+        #endif
+    }
+    #if os(macOS)
+    @MainActor static func run(_ mode: String) {
+        let model = AppModel.shared
+        switch mode {
+        case "panel":
+            SearchPanelController.shared.show()
+            if let q = UserDefaults.standard.string(forKey: "OKShotQuery") { SearchPanelController.shared.state.query = q }
+        case "manage", "edit":
+            model.selectedID = model.templates.first?.id
+            AppWindows.openManage()
+        case "io":
+            model.ioRequested = true
+            AppWindows.openManage()
+        case "settings":
+            AppWindows.openSettings()
+        default:
+            AppWindows.openManage()
+        }
+    }
+    #endif
+}
