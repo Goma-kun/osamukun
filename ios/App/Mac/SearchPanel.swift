@@ -54,6 +54,21 @@ final class SearchPanelController {
         place(p)
         p.makeKeyAndOrderFront(nil)
         installMonitors(p)
+        focusField(p)
+    }
+
+    /// 検索欄にキーボードを向ける。前面のアプリを変えないパネルでは SwiftUI の @FocusState が効かないので、
+    /// NSTextField を探して自分でファーストレスポンダにする
+    private func focusField(_ p: NSPanel) {
+        func find(_ v: NSView) -> NSTextField? {
+            if let f = v as? NSTextField, f.isEditable { return f }
+            for c in v.subviews { if let f = find(c) { return f } }
+            return nil
+        }
+        if let v = p.contentView, let f = find(v) {
+            p.makeFirstResponder(f)
+            f.currentEditor()?.selectAll(nil)
+        }
     }
 
     func hide() {
@@ -157,16 +172,12 @@ struct SearchPanelView: View {
     @ObservedObject var state: PanelState
     @ObservedObject var model = AppModel.shared
     let controller: SearchPanelController
-    @FocusState private var focused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass").font(.system(size: 18, weight: .medium)).foregroundStyle(Theme.muted)
-                TextField(String(localized: "定型文を検索（概要・本文・カテゴリ）"), text: $state.query)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 20))
-                    .focused($focused)
+                PanelSearchField(text: $state.query, placeholder: String(localized: "定型文を検索（概要・本文・カテゴリ）"))
                 CategoryPicker(selection: $state.category, categories: model.categories)
             }
             .padding(.horizontal, 14).padding(.vertical, 12)
@@ -178,8 +189,6 @@ struct SearchPanelView: View {
         .background(Theme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.border))
-        .onAppear { focused = true }
-        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in focused = true }
     }
 
     @ViewBuilder
@@ -254,6 +263,44 @@ struct SearchPanelView: View {
             VersionBadge()
         }
         .padding(.horizontal, 14).padding(.vertical, 8)
+    }
+}
+
+/// パネルの検索欄。AppKit の NSTextField をそのまま使う（ファーストレスポンダを外から握れるようにするため）
+struct PanelSearchField: NSViewRepresentable {
+    @Binding var text: String
+    var placeholder: String
+
+    func makeNSView(context: Context) -> NSTextField {
+        let f = NSTextField()
+        f.isBordered = false
+        f.drawsBackground = false
+        f.focusRingType = .none
+        f.font = .systemFont(ofSize: 20)
+        f.placeholderString = placeholder
+        f.delegate = context.coordinator
+        f.lineBreakMode = .byTruncatingTail
+        f.cell?.usesSingleLineMode = true
+        f.cell?.wraps = false
+        f.cell?.isScrollable = true
+        f.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        f.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return f
+    }
+
+    func updateNSView(_ v: NSTextField, context: Context) {
+        if v.stringValue != text { v.stringValue = text }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    final class Coordinator: NSObject, NSTextFieldDelegate {
+        var parent: PanelSearchField
+        init(_ p: PanelSearchField) { parent = p }
+        func controlTextDidChange(_ n: Notification) {
+            guard let f = n.object as? NSTextField else { return }
+            parent.text = f.stringValue
+        }
     }
 }
 
