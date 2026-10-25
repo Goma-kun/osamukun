@@ -189,6 +189,8 @@ struct SearchPanelView: View {
         .background(Theme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.border))
+        // タイトルバーを隠した窓なので、その分のセーフエリアまで描く（空けると上に黒い帯が出る）
+        .ignoresSafeArea()
     }
 
     @ViewBuilder
